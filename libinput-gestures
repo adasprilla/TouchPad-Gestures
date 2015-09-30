@@ -1,0 +1,129 @@
+#!/usr/bin/env python3
+'Read gestures from libinput touchpad and action shell commands.'
+# Mark Blakeney, Sep 2015
+import os, sys, argparse, subprocess, shlex, re
+
+PROG = os.path.basename(sys.argv[0])
+
+# Conf file containing gesture commands
+CONF = os.path.expanduser('~/.config/{}.conf'.format(PROG))
+
+def get_device():
+    'Determine libinput touchpad device path'
+    out = subprocess.check_output('libinput-list-devices',
+            universal_newlines=True)
+
+    dev = None
+    for line in out.splitlines():
+        line = line.strip()
+        if not line or ':' not in line:
+            continue
+
+        key, value = line.split(':', maxsplit=1)
+        key = key.strip()
+        value = value.strip()
+
+        # Assume that any device that has any Tap-to-click value is a
+        # touchpad.
+        if key == 'Kernel':
+            dev = value
+        elif key == 'Tap-to-click' and value != 'n/a' and dev:
+            return dev
+
+    print('Could not determine touchpad device.', file=sys.stderr)
+    sys.exit(1)
+
+def get_conf(conffile):
+    'Read configuration file'
+    actions = {}
+    with open(conffile) as fp:
+        for line in fp:
+            line = line.strip()
+            if not line or line[0] == '#':
+                continue
+
+            key, data = line.split(maxsplit=1)
+
+            if key == 'gesture:':
+                action, motion, command = data.split(maxsplit=2)
+                actions[(action.lower(), motion.lower())] = shlex.split(command)
+            else:
+                print('Unknown conf key {} in line {} of {}.'.format(
+                    key, line, conffile), file=sys.stderr)
+                sys.exit(1)
+
+    if not actions:
+        print('No gestures defined in conf file {}, exiting.'.format(conffile))
+        sys.exit(0)
+
+    return actions
+
+# Set up command line arguments
+opt = argparse.ArgumentParser(description=__doc__,
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+opt.add_argument('-c', '--conffile', default=CONF,
+        help='Gestures configuration file')
+opt.add_argument('-d', '--debug', action='store_true',
+        help='Output diagnostic messages')
+args = opt.parse_args()
+
+# Get touchpad device
+device = get_device()
+
+# Read actions from conf file
+actions = get_conf(args.conffile)
+
+def do_action(action, coords):
+    'Action given gesture'
+    if action == 'swipe':
+        # Require movement beyond a small threshhold.
+        if abs(coords[0] - coords[1]) < 70:
+            return
+        if abs(coords[0]) > abs(coords[1]):
+            motion = 'left' if coords[0] < 0 else 'right'
+        else:
+            motion = 'up' if coords[1] < 0 else 'down'
+
+    elif action == 'pinch':
+        if coords[0] == coords[1] == 0:
+            return
+        motion = 'in' if coords[1] > 0 else 'out'
+
+    act_command = actions.get((action, motion))
+    if act_command:
+        if args.debug:
+            print('{}: {} {} {}'.format(PROG, action, motion, coords))
+        subprocess.check_call(act_command)
+
+if args.debug:
+    print('{}: monitoring device {} for {} gestures'.format(PROG,
+        device, len(actions)))
+
+# Note your must "sudo gpasswd -a USER input" then log out/in for
+# permission to access the device.
+command = 'stdbuf -oL -- libinput-debug-events --device {}'.format(device)
+
+cmd = subprocess.Popen(shlex.split(command), stdout=subprocess.PIPE,
+        universal_newlines=True, bufsize=0)
+
+# Sit in a loop forever reading the libinput debug output for GESTURES ..
+coords = [0, 0]
+for line in cmd.stdout:
+    if 'GESTURE_' not in line:
+        continue
+
+    params = line.strip().split(maxsplit=4)
+    action = params[1][8:]
+
+    if 'BEGIN' in action:
+        coords = [0, 0]
+    elif 'END' in action:
+        # Ignore gesture if final action is cancelled
+        if len(params) <= 4:
+            do_action(action[:-4].lower(), coords)
+        coords = [0, 0]
+    elif 'UPDATE' in action:
+        # Accumulate unaccelerated x/y coordinate values
+        coord = re.split(r'[ (/]*', params[4])[2:4]
+        coords[0] += float(coord[0])
+        coords[1] += float(coord[1])
