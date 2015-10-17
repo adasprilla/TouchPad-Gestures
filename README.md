@@ -36,12 +36,12 @@ Then install this software:
 Configure gestures in `~/.config/libinput-gestures.conf` or use the
 examples already configured. The available gestures are:
 
-- swipe up
-- swipe down
-- swipe left
-- swipe right
-- pinch in
-- pinch out
+- swipe up (e.g. map to GNOME SHELL move to prev workspace)
+- swipe down (e.g map to GNOME SHELL move to next workspace)
+- swipe left (e.g. map to GNOME/Browser go back)
+- swipe right (e.g. map to GNOME/Browser go forward)
+- pinch in (e.g. map to GNOME SHELL open overview)
+- pinch out (e.g. map to GNOME SHELL open overview)
 
 At present, only 3 finger gestures are supported (as
 `libinput-debug-events` does not seem to output 4 finger gestures atm?).
