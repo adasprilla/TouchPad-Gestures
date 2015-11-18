@@ -57,7 +57,15 @@ def get_conf(conffile):
 
             if key == 'gesture:':
                 action, motion, command = data.split(maxsplit=2)
-                actions[(action.lower(), motion.lower())] = shlex.split(command)
+                fingers, ncommand = command.split(maxsplit=1)
+
+                # Gesture can be configured with optional specific finger count
+                if fingers.isdigit() and len(fingers) == 1:
+                    actions[(action.lower(), motion.lower(), fingers)] = \
+                            shlex.split(ncommand)
+                else:
+                    actions[(action.lower(), motion.lower())] = \
+                            shlex.split(command)
             else:
                 print('Unknown conf key {} in line {} of {}.'.format(
                     key, line, conffile), file=sys.stderr)
@@ -92,7 +100,7 @@ device = get_device()
 # Read actions from conf file
 actions = get_conf(args.conffile)
 
-def do_action(action, coords):
+def do_action(action, fingers, coords):
     'Action given gesture'
     if action == 'swipe':
         # Require movement beyond a small threshhold.
@@ -108,10 +116,12 @@ def do_action(action, coords):
             return
         motion = 'in' if coords[1] > 0 else 'out'
 
-    act_command = actions.get((action, motion))
+    act_command = actions.get((action, motion, fingers)) or \
+            actions.get((action, motion))
     if act_command:
         if args.debug:
-            print('{}: {} {} {}'.format(PROG, action, motion, coords))
+            print('{}: {} {} {} {}'.format(PROG, action, motion, fingers,
+                coords))
         subprocess.check_call(act_command)
 
 if args.debug:
@@ -139,7 +149,7 @@ for line in cmd.stdout:
     elif 'END' in action:
         # Ignore gesture if final action is cancelled
         if len(params) <= 4:
-            do_action(action[:-4].lower(), coords)
+            do_action(action[:-4].lower(), params[3], coords)
         coords = [0, 0]
     elif 'UPDATE' in action:
         # Accumulate unaccelerated x/y coordinate values

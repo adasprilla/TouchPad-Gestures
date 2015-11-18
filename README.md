@@ -43,10 +43,15 @@ examples already configured. The available gestures are:
 - pinch in (e.g. map to GNOME SHELL open overview)
 - pinch out (e.g. map to GNOME SHELL open overview)
 
-At present, only 3 finger gestures are supported (as
-`libinput-debug-events` does not seem to output 4 finger gestures atm?).
-Of course, 2 finger swipes and taps are already interpreted by GNOME and
-apps for scrolling etc.
+You can choose to specify a finger count, typically 3 or 4 fingers. If
+specified then the command is executed when exactly that number of
+fingers is used in the gesture. If not specified then the command is
+executed when that gesture is executed with any number of fingers.
+Gestures specified with finger count have priority over the same gesture
+specified without any finger count.
+
+Of course, 2 finger swipes and taps are already interpreted by GNOME or
+your DE and apps for scrolling etc.
 
 IMPORTANT: Test the program. Check for reported errors, missing packages, etc:
 
