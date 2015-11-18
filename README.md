@@ -67,9 +67,9 @@ Log out and back in to your DE session to complete installation.
 
     cd libinput-gestures        # Source dir, as above
     git pull
-    make install
+    make restart
 
-Log out and back in to your DE session to complete installation.
+You can do a `mark restart` anytime to reload your configuration file.
 
 ### LICENSE
 
