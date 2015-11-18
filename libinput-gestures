@@ -124,6 +124,6 @@ for line in cmd.stdout:
         coords = [0, 0]
     elif 'UPDATE' in action:
         # Accumulate unaccelerated x/y coordinate values
-        coord = re.split(r'[ (/]*', params[4])[2:4]
+        coord = re.split(r'[ (/]+', params[4])[2:4]
         coords[0] += float(coord[0])
         coords[1] += float(coord[1])
