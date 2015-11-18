@@ -69,7 +69,7 @@ Log out and back in to your DE session to complete installation.
     git pull
     make restart
 
-You can do a `mark restart` anytime to reload your configuration file.
+You can do a `make restart` anytime to reload your configuration file.
 
 ### LICENSE
 
