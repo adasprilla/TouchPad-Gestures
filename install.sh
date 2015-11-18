@@ -61,8 +61,10 @@ clean() {
 
 if [ $STOP -ne 0 ]; then
     for prog in libinput-debug-events libinput-gestures; do
-	if pkill -s0 -f $prog; then
+	if pkill -f $prog; then
 	    echo "$prog stopped."
+	elif pkill -s0 -f $prog; then
+	    echo "$prog killed"
 	fi
     done
 elif [ $REMOVE -eq 0 ]; then

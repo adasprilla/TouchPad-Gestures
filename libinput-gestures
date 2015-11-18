@@ -1,12 +1,23 @@
 #!/usr/bin/env python3
 'Read gestures from libinput touchpad and action shell commands.'
 # Mark Blakeney, Sep 2015
-import os, sys, argparse, subprocess, shlex, re
+import os, sys, argparse, subprocess, shlex, re, getpass, fcntl
 
 PROG = os.path.basename(sys.argv[0])
 
 # Conf file containing gesture commands
 CONF = os.path.expanduser('~/.config/{}.conf'.format(PROG))
+
+def open_lock(*args):
+    'Create a lock based on given list of arguments'
+    # We use exclusive assess to a file for this
+    fp = open(os.path.join('/tmp', '-'.join(args) + '.lock'), 'w')
+    try:
+        fcntl.lockf(fp, fcntl.LOCK_EX | fcntl.LOCK_NB)
+    except IOError:
+        return None
+
+    return fp
 
 def get_device():
     'Determine libinput touchpad device path'
@@ -66,6 +77,14 @@ opt.add_argument('-c', '--conffile', default=CONF,
 opt.add_argument('-d', '--debug', action='store_true',
         help='Output diagnostic messages')
 args = opt.parse_args()
+
+# Make sure only one instance running for current user
+user = getpass.getuser()
+proglock = open_lock(PROG, user)
+if not proglock:
+    print('{} is already running for {}, terminating ..'.format(PROG, user),
+            file=sys.stderr)
+    sys.exit(1)
 
 # Get touchpad device
 device = get_device()
