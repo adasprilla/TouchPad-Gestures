@@ -8,6 +8,20 @@ PROG = os.path.basename(sys.argv[0])
 # Conf file containing gesture commands
 CONF = os.path.expanduser('~/.config/{}.conf'.format(PROG))
 
+# Set up command line arguments
+opt = argparse.ArgumentParser(description=__doc__,
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+opt.add_argument('-c', '--conffile', default=CONF,
+        help='Gestures configuration file')
+opt.add_argument('-v', '--verbose', action='store_true',
+        help='Output diagnostic messages')
+opt.add_argument('-d', '--debug', action='store_true',
+        help='Output diagnostic messages only, do not action gestures')
+args = opt.parse_args()
+
+if args.debug:
+    args.verbose = True
+
 def open_lock(*args):
     'Create a lock based on given list of arguments'
     # We use exclusive assess to a file for this
@@ -44,9 +58,76 @@ def get_device():
     print('Could not determine touchpad device.', file=sys.stderr)
     sys.exit(1)
 
+class GESTURE:
+    'Base class for handling for gestures'
+    def __init__(self):
+        'Initialise this gesture at program start'
+        self.name = type(self).__name__
+        self.motions = {}
+
+    def add(self, motion, fingers, command):
+        'Add a configured motion command for this gesture'
+        if fingers:
+            self.motions[(motion, fingers)] = shlex.split(command)
+        else:
+            self.motions[motion] = shlex.split(command)
+
+    def action(self, motion):
+        'Action a motion command for this gesture'
+        command = self.motions.get((motion, self.fingers)) or \
+                self.motions.get(motion)
+        if command:
+            if args.verbose:
+                print('{}: {} {} {} {}'.format(PROG, self.name, motion,
+                    self.fingers, self.data))
+            if not args.debug:
+                subprocess.check_call(command)
+
+    def begin(self, fingers):
+        'Initialise this gesture at the start of motion'
+        self.data = [0, 0]
+        self.fingers = fingers
+
+class SWIPE(GESTURE):
+    'Class to handle this type of gesture'
+    def update(self, coordlist):
+        'Update this gesture for a motion'
+        self.data[0] += float(coordlist[2])
+        self.data[1] += float(coordlist[3])
+
+    def end(self):
+        'Action this gesture at the end of a motion sequence'
+        # Require movement beyond a small threshhold.
+        if abs(self.data[0] - self.data[1]) >= 70:
+            if abs(self.data[0]) > abs(self.data[1]):
+                motion = 'left' if self.data[0] < 0 else 'right'
+            else:
+                motion = 'up' if self.data[1] < 0 else 'down'
+
+            self.action(motion)
+
+class PINCH(GESTURE):
+    'Class to handle this type of gesture'
+    def update(self, coordlist):
+        'Update this gesture for a motion'
+        if float(coordlist[5]) < 1.0:
+            self.data[0] += 1
+        else:
+            self.data[1] += 1
+
+    def end(self):
+        'Action this gesture at the end of a motion sequence'
+        # Require movement beyond a small threshhold.
+        diff = self.data[0] - self.data[1]
+        if abs(diff) > 2:
+            self.action('in' if diff > 0 else 'out')
+
+# Define and create gesture handlers
+handlers = {'SWIPE': SWIPE(), 'PINCH': PINCH()}
+
 def get_conf(conffile):
     'Read configuration file'
-    actions = {}
+    count = 0
     with open(conffile) as fp:
         for line in fp:
             line = line.strip()
@@ -56,35 +137,29 @@ def get_conf(conffile):
             key, data = line.split(maxsplit=1)
 
             if key == 'gesture:':
-                action, motion, command = data.split(maxsplit=2)
+                gesture, motion, command = data.split(maxsplit=2)
                 fingers, ncommand = command.split(maxsplit=1)
+                handler = handlers.get(gesture.upper())
+                if handler:
+                    count += 1
 
-                # Gesture can be configured with optional specific finger count
-                if fingers.isdigit() and len(fingers) == 1:
-                    actions[(action.lower(), motion.lower(), fingers)] = \
-                            shlex.split(ncommand)
-                else:
-                    actions[(action.lower(), motion.lower())] = \
-                            shlex.split(command)
-            else:
-                print('Unknown conf key {} in line {} of {}.'.format(
-                    key, line, conffile), file=sys.stderr)
+                    # Gesture can be configured with optional specific
+                    # finger count
+                    if fingers.isdigit() and len(fingers) == 1:
+                        handler.add(motion.lower(), fingers, ncommand)
+                    else:
+                        handler.add(motion.lower(), None, command)
+
+            if not handler:
+                print('Unknown conf key {} in line {} of {}.'.format(key, line,
+                    conffile), file=sys.stderr)
                 sys.exit(1)
 
-    if not actions:
+    if count == 0:
         print('No gestures defined in conf file {}, exiting.'.format(conffile))
         sys.exit(0)
 
-    return actions
-
-# Set up command line arguments
-opt = argparse.ArgumentParser(description=__doc__,
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-opt.add_argument('-c', '--conffile', default=CONF,
-        help='Gestures configuration file')
-opt.add_argument('-d', '--debug', action='store_true',
-        help='Output diagnostic messages')
-args = opt.parse_args()
+    return count
 
 # Make sure only one instance running for current user
 user = getpass.getuser()
@@ -97,38 +172,14 @@ if not proglock:
 # Get touchpad device
 device = get_device()
 
-# Read actions from conf file
-actions = get_conf(args.conffile)
+# Read gestures from conf file
+count = get_conf(args.conffile)
 
-def do_action(action, fingers, coords):
-    'Action given gesture'
-    if action == 'swipe':
-        # Require movement beyond a small threshhold.
-        if abs(coords[0] - coords[1]) < 70:
-            return
-        if abs(coords[0]) > abs(coords[1]):
-            motion = 'left' if coords[0] < 0 else 'right'
-        else:
-            motion = 'up' if coords[1] < 0 else 'down'
+if args.verbose:
+    print('{}: monitoring device {} for {} gestures'.format(PROG, device,
+        count))
 
-    elif action == 'pinch':
-        if coords[0] == coords[1] == 0:
-            return
-        motion = 'in' if coords[1] > 0 else 'out'
-
-    act_command = actions.get((action, motion, fingers)) or \
-            actions.get((action, motion))
-    if act_command:
-        if args.debug:
-            print('{}: {} {} {} {}'.format(PROG, action, motion, fingers,
-                coords))
-        subprocess.check_call(act_command)
-
-if args.debug:
-    print('{}: monitoring device {} for {} gestures'.format(PROG,
-        device, len(actions)))
-
-# Note your must "sudo gpasswd -a USER input" then log out/in for
+# Note your must "sudo gpasswd -a $USER input" then log out/in for
 # permission to access the device.
 command = 'stdbuf -oL -- libinput-debug-events --device {}'.format(device)
 
@@ -136,23 +187,35 @@ cmd = subprocess.Popen(shlex.split(command), stdout=subprocess.PIPE,
         universal_newlines=True, bufsize=0)
 
 # Sit in a loop forever reading the libinput debug output for GESTURES ..
-coords = [0, 0]
+handler = None
 for line in cmd.stdout:
     if 'GESTURE_' not in line:
         continue
 
-    params = line.strip().split(maxsplit=4)
-    action = params[1][8:]
+    # Split debug line into relevant fields
+    dev, gevent, time, other = line.strip().split(maxsplit=3)
+    gesture, event = gevent[8:].split('_')
+    if ' ' in other:
+        fingers, params = other.split(maxsplit=1)
+    else:
+        fingers, params = other, None
 
-    if 'BEGIN' in action:
-        coords = [0, 0]
-    elif 'END' in action:
+    # Action each type of event
+    if event == 'UPDATE':
+        if handler:
+            handler.update(re.split(r'[ (/@]+', params))
+    elif event == 'BEGIN':
+        handler = handlers.get(gesture)
+        if handler:
+            handler.begin(fingers)
+        else:
+            print('Unknown gesture received: {}'.format(gesture),
+                    file=sys.stderr)
+    elif event == 'END':
         # Ignore gesture if final action is cancelled
-        if len(params) <= 4:
-            do_action(action[:-4].lower(), params[3], coords)
-        coords = [0, 0]
-    elif 'UPDATE' in action:
-        # Accumulate unaccelerated x/y coordinate values
-        coord = re.split(r'[ (/]+', params[4])[2:4]
-        coords[0] += float(coord[0])
-        coords[1] += float(coord[1])
+        if params != 'cancelled' and handler:
+            handler.end()
+        handler = None
+    else:
+        print('Unknown gesture + event received: {} {}'.format(gesture, event),
+                file=sys.stderr)

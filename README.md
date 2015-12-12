@@ -23,7 +23,7 @@ DE's etc.
 You need libinput release 1.0 or later. Install prerequisites:
 
     sudo pacman -S xdotool
-    sudo gpasswd -a USER input  # Then log out and back in to assign this group
+    sudo gpasswd -a $USER input  # Then log out and back in to assign this group
 
 Then install this software:
 
@@ -55,7 +55,7 @@ your DE and apps for scrolling etc.
 
 IMPORTANT: Test the program. Check for reported errors, missing packages, etc:
 
-    libinput-gestures -d                       # Assuming ~/bin is in your PATH.
+    libinput-gestures -v                       # Assuming ~/bin is in your PATH.
     (<ctrl-c> to stop application)
 
 Search for, and then start, the libinput-gestures app in your DE. It
