@@ -59,14 +59,20 @@ IMPORTANT: Test the program. Check for reported errors, missing packages, etc:
     (<ctrl-c> to stop application)
 
 Search for, and then start, the libinput-gestures app in your DE. It
-should also start automatically at log in and run in the background.
+should also start automatically at log in and run in the background. Or
+you can start it immediately with:
 
-### REMOVAL
+    make start
 
-    cd libinput-gestures        # Source dir, as above
-    make uninstall
+You can stop the app with:
 
-Log out and back in to your DE session to complete installation.
+    make stop
+
+### RELOAD CONFIGURATION
+
+Type the following anytime to reload your configuration file:
+
+    make restart
 
 ### UPGRADE
 
@@ -74,7 +80,10 @@ Log out and back in to your DE session to complete installation.
     git pull
     make restart
 
-You can do a `make restart` anytime to reload your configuration file.
+### REMOVAL
+
+    cd libinput-gestures        # Source dir, as above
+    make uninstall
 
 ### LICENSE
 

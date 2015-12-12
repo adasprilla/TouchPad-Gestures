@@ -17,7 +17,7 @@ DOC = README.md
 DOCOUT = $(DOC:.md=.html)
 
 all:
-	@echo "Type make install or uninstall"
+	@echo "Type make install|uninstall|start|stop|restart"
 
 install:
 	@./install.sh
