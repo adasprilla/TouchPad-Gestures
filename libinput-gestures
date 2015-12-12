@@ -83,17 +83,17 @@ class GESTURE:
             if not args.debug:
                 subprocess.check_call(command)
 
-    def begin(self, fingers):
-        'Initialise this gesture at the start of motion'
-        self.data = [0, 0]
-        self.fingers = fingers
-
 class SWIPE(GESTURE):
     'Class to handle this type of gesture'
-    def update(self, coordlist):
+    def begin(self, fingers):
+        'Initialise this gesture at the start of motion'
+        self.fingers = fingers
+        self.data = [0.0, 0.0]
+
+    def update(self, coords):
         'Update this gesture for a motion'
-        self.data[0] += float(coordlist[2])
-        self.data[1] += float(coordlist[3])
+        self.data[0] += float(coords[2])
+        self.data[1] += float(coords[3])
 
     def end(self):
         'Action this gesture at the end of a motion sequence'
@@ -108,19 +108,19 @@ class SWIPE(GESTURE):
 
 class PINCH(GESTURE):
     'Class to handle this type of gesture'
-    def update(self, coordlist):
+    def begin(self, fingers):
+        'Initialise this gesture at the start of motion'
+        self.fingers = fingers
+        self.data = 0.0
+
+    def update(self, coords):
         'Update this gesture for a motion'
-        if float(coordlist[5]) < 1.0:
-            self.data[0] += 1
-        else:
-            self.data[1] += 1
+        self.data += 1.0 - float(coords[5])
 
     def end(self):
         'Action this gesture at the end of a motion sequence'
-        # Require movement beyond a small threshhold.
-        diff = self.data[0] - self.data[1]
-        if abs(diff) > 2:
-            self.action('in' if diff > 0 else 'out')
+        if self.data != 0.0:
+            self.action('in' if self.data >= 0.0 else 'out')
 
 # Define and create gesture handlers
 handlers = {'SWIPE': SWIPE(), 'PINCH': PINCH()}
