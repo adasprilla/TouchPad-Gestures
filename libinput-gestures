@@ -122,8 +122,9 @@ class PINCH(GESTURE):
         if self.data != 0.0:
             self.action('in' if self.data >= 0.0 else 'out')
 
-# Define and create gesture handlers
-handlers = {'SWIPE': SWIPE(), 'PINCH': PINCH()}
+# Create gesture handler instances and insert them in handler lookup
+# table based on their name.
+handlers = {h.name: h for h in (SWIPE(), PINCH())}
 
 def get_conf(conffile):
     'Read configuration file'
