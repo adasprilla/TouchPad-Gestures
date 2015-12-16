@@ -67,7 +67,7 @@ class GESTURE:
 
     def add(self, motion, fingers, command):
         'Add a configured motion command for this gesture'
-        if motion not in self.MOTIONS:
+        if motion not in self.SUPPORTED_MOTIONS:
             return None
 
         if fingers:
@@ -79,18 +79,22 @@ class GESTURE:
 
     def action(self, motion):
         'Action a motion command for this gesture'
+
         command = self.motions.get((motion, self.fingers)) or \
                 self.motions.get(motion)
-        if command:
-            if args.verbose:
-                print('{}: {} {} {} {}'.format(PROG, self.name, motion,
-                    self.fingers, self.data))
-            if not args.debug:
-                subprocess.check_call(command)
+
+        if args.verbose:
+            print('{}: {} {} {} {}'.format(PROG, self.name, motion,
+                self.fingers, self.data))
+            if command:
+                print('  {}'.format(command))
+
+        if command and not args.debug:
+            subprocess.check_call(command)
 
 class SWIPE(GESTURE):
     'Class to handle this type of gesture'
-    MOTIONS = ('left', 'right', 'up', 'down')
+    SUPPORTED_MOTIONS = ('left', 'right', 'up', 'down')
 
     def begin(self, fingers):
         'Initialise this gesture at the start of motion'
@@ -115,7 +119,7 @@ class SWIPE(GESTURE):
 
 class PINCH(GESTURE):
     'Class to handle this type of gesture'
-    MOTIONS = ('in', 'out')
+    SUPPORTED_MOTIONS = ('in', 'out')
 
     def begin(self, fingers):
         'Initialise this gesture at the start of motion'
@@ -165,10 +169,6 @@ def get_conf(conffile):
                 print('Error in file {} for line:\n{}.'.format(conffile, line),
                         file=sys.stderr)
                 sys.exit(1)
-
-    if count == 0:
-        print('No gestures defined in conf file {}, exiting.'.format(conffile))
-        sys.exit(0)
 
     return count
 

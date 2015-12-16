@@ -7,6 +7,9 @@ be configured to activate a shell command which is typically an
 [_xdotool_](http://www.semicomplete.com/projects/xdotool/) command to
 action desktop/window/application keyboard combinations and commands.
 See the examples in the provided `libinput-gestures.conf` file.
+My main motivation for creating this is to use triple swipe up/down to
+switch GNOME workspaces, and triple swipe left/right to go
+backwards/forwards in my browser, as per the default configuration.
 
 This small and simple utility is only intended to be used temporarily
 until GNOME and other DE's action libinput gestures natively.
