@@ -43,8 +43,8 @@ examples already configured. The available gestures are:
 - swipe down (e.g map to GNOME SHELL move to next workspace)
 - swipe left (e.g. map to GNOME/Browser go back)
 - swipe right (e.g. map to GNOME/Browser go forward)
-- pinch in (e.g. map to GNOME SHELL open overview)
-- pinch out (e.g. map to GNOME SHELL open overview)
+- pinch in (e.g. map to GNOME SHELL open/close overview)
+- pinch out (e.g. map to GNOME SHELL open/close overview)
 
 You can choose to specify a finger count, typically 3 or 4 fingers. If
 specified then the command is executed when exactly that number of
