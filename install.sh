@@ -73,7 +73,14 @@ elif [ $REMOVE -eq 0 ]; then
 
     if [ $NO_DESKTOP -eq 0 ]; then
 	mkdir -p $APPDIR
-	install -CDv -m 644 $PROG.desktop -t $APPDIR
+	tmp=$(mktemp)
+	sed "s#^Exec=.*#Exec=$HOME/bin/$PROG#" $PROG.desktop >$tmp
+	if ! cmp -s $tmp $APPDIR/$PROG.desktop; then
+	    echo "$PROG.desktop -> $APPDIR/$PROG.desktop"
+	    mv $tmp $APPDIR/$PROG.desktop
+	    chmod 644 $APPDIR/$PROG.desktop
+	fi
+	rm -f $tmp
 
 	mkdir -p $AUTDIR
 	if [ ! -L $AUTDIR/$PROG.desktop ]; then
