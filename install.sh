@@ -75,7 +75,7 @@ elif [ $REMOVE -eq 0 ]; then
 	mkdir -p $APPDIR
 	tmp=$(mktemp)
 	sed "s#^Exec=.*#Exec=$HOME/bin/$PROG#" $PROG.desktop >$tmp
-	if ! cmp -s $tmp $APPDIR/$PROG.desktop; then
+	if ! cmp -s $tmp "$APPDIR/$PROG.desktop"; then
 	    echo "$PROG.desktop -> $APPDIR/$PROG.desktop"
 	    mv $tmp $APPDIR/$PROG.desktop
 	    chmod 644 $APPDIR/$PROG.desktop
