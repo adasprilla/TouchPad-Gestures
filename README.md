@@ -26,6 +26,10 @@ DE's etc.
 You need libinput release 1.0 or later. Install prerequisites:
 
     sudo pacman -S xdotool
+
+You must be a member of the _input_ group to have permission to read the
+touchpad device:
+
     sudo gpasswd -a $USER input  # Then log out and back in to assign this group
 
 Then install this software:
