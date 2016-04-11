@@ -4,8 +4,8 @@
 
 PROG="libinput-gestures"
 BINDIR="$HOME/bin"
-APPDIR="$HOME/.local/share/applications"
-AUTDIR="$HOME/.config/autostart"
+APPDIR="${XDG_DATA_HOME:-$HOME/.local/share}/applications"
+AUTDIR="${XDG_CONFIG_HOME:-$HOME/.config}/autostart"
 
 usage() {
     echo "Usage: $(basename $0) [-options]"
