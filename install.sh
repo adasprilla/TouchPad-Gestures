@@ -3,7 +3,13 @@
 # (C) Mark Blakeney, markb@berlios.de, Sep 2015.
 
 PROG="libinput-gestures"
-BINDIR="$HOME/bin"
+
+# Table of personal program bin/ dirs to search. First one found is one
+# used. Default is first one if no others found.
+BINDIRS=(
+"$HOME/.local/bin"
+"$HOME/bin"
+)
 APPDIR="${XDG_DATA_HOME:-$HOME/.local/share}/applications"
 AUTDIR="${XDG_CONFIG_HOME:-$HOME/.config}/autostart"
 
@@ -45,6 +51,15 @@ if [ "$(id -un)" = "root" ]; then
     exit 1
 fi
 
+# Search for personal bin/ dir. Default is 1st in list.
+bindir="$BINDIRS"
+for dir in "${BINDIRS[@]}"; do
+    if [ -d "$dir" ]; then
+	bindir="$dir"
+	break
+    fi
+done
+
 # Delete or list file/dir
 clean() {
     local tgt=$1
@@ -56,7 +71,9 @@ clean() {
 	    echo "Removing $tgt"
 	fi
 	rm -rf $tgt
+	return 0
     fi
+    return 1
 }
 
 if [ $STOP -ne 0 ]; then
@@ -68,13 +85,13 @@ if [ $STOP -ne 0 ]; then
 	fi
     done
 elif [ $REMOVE -eq 0 ]; then
-    mkdir -p $BINDIR
-    install -CDv $PROG -t $BINDIR
+    mkdir -p $bindir
+    install -CDv $PROG -t $bindir
 
     if [ $NO_DESKTOP -eq 0 ]; then
 	mkdir -p $APPDIR
 	tmp=$(mktemp)
-	sed "s#^Exec=.*#Exec=$BINDIR/$PROG#" $PROG.desktop >$tmp
+	sed "s#^Exec=.*#Exec=$bindir/$PROG#" $PROG.desktop >$tmp
 	if ! cmp -s $tmp "$APPDIR/$PROG.desktop"; then
 	    echo "$PROG.desktop -> $APPDIR/$PROG.desktop"
 	    mv $tmp $APPDIR/$PROG.desktop
@@ -95,9 +112,11 @@ elif [ $REMOVE -eq 0 ]; then
 fi
 
 if [ $REMOVE -ne 0 ]; then
-    if clean $BINDIR/$PROG; then
-	rmdir --ignore-fail-on-non-empty $BINDIR
-    fi
+    for dir in "${BINDIRS[@]}"; do
+	if clean $dir/$PROG; then
+	    rmdir --ignore-fail-on-non-empty $dir
+	fi
+    done
 
     clean $APPDIR/$PROG.desktop
     clean $AUTDIR/$PROG.desktop
