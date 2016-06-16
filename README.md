@@ -1,25 +1,25 @@
 ### LIBINPUT-GESTURES
 
-This utility reads libinput gestures from your touchpad using
-_libinput-debug-events_ and maps them to gestures you configure in a
-configuration file `~/.config/libinput-gestures.conf`. Each gesture can
-be configured to activate a shell command which is typically an
+This utility reads libinput gestures from your touchpad and maps them to
+gestures you configure in a configuration file
+`~/.config/libinput-gestures.conf`. Each gesture can be configured to
+activate a shell command which is typically an
 [_xdotool_](http://www.semicomplete.com/projects/xdotool/) command to
 action desktop/window/application keyboard combinations and commands.
-See the examples in the provided `libinput-gestures.conf` file.
-My main motivation for creating this is to use triple swipe up/down to
-switch GNOME workspaces, and triple swipe left/right to go
-backwards/forwards in my browser, as per the default configuration.
+See the examples in the provided `libinput-gestures.conf` file. My
+motivation for creating this is to use triple swipe up/down to switch
+GNOME workspaces, and triple swipe left/right to go backwards/forwards
+in my browser, as per the default configuration.
 
 This small and simple utility is only intended to be used temporarily
-until GNOME and other DE's action libinput gestures natively.
-It parses the output of the _libinput-list-devices_ and
-_libinput-debug-events_ utilties so is a little fragile to any version
-changes in their output format.
+until GNOME and other DE's action libinput gestures natively. It parses
+the output of the _libinput-list-devices_ and _libinput-debug-events_
+utilties so is a little fragile to any version changes in their output
+format.
 
-This utility is developed and tested on Arch linux with the GNOME
-3 DE on Xorg. I am not sure how well this will work on other distros and other
-DE's etc.
+This utility is developed and tested on Arch linux with the GNOME 3 DE
+on Xorg. I am not sure how well this will work on other distros and
+other DE's etc.
 
 ### INSTALLATION
 
@@ -27,8 +27,8 @@ You need libinput release 1.0 or later. Install prerequisites:
 
     sudo pacman -S xdotool
 
-You must be a member of the _input_ group to have permission to read the
-touchpad device:
+IMPORTANT: You must be a member of the _input_ group to have permission
+to read the touchpad device:
 
     sudo gpasswd -a $USER input  # Then log out and back in to assign this group
 
@@ -50,24 +50,36 @@ examples already configured. The available gestures are:
 - pinch in (e.g. map to GNOME SHELL open/close overview)
 - pinch out (e.g. map to GNOME SHELL open/close overview)
 
-You can choose to specify a finger count, typically 3 or 4 fingers. If
-specified then the command is executed when exactly that number of
-fingers is used in the gesture. If not specified then the command is
-executed when that gesture is executed with any number of fingers.
-Gestures specified with finger count have priority over the same gesture
-specified without any finger count.
+You can choose to specify a specific finger count, typically 3 or 4
+fingers. If specified then the command is executed when exactly that
+number of fingers is used in the gesture. If not specified then the
+command is executed when that gesture is executed with any number of
+fingers. Gestures specified with finger count have priority over the
+same gesture specified without any finger count.
 
 Of course, 2 finger swipes and taps are already interpreted by GNOME or
 your DE and apps for scrolling etc.
 
 IMPORTANT: Test the program. Check for reported errors, missing packages, etc:
 
-    libinput-gestures -v                       # Assuming ~/bin is in your PATH.
-    (<ctrl-c> to stop application)
+    # cd to source dir, as above
+    make stop
+
+    # Test to print out commands that would be executed:
+    ./libinput-gestures -d
+    (<ctrl-c> to stop)
+
+    # And/or test to print out commands as they are executed:
+    ./libinput-gestures -v
+    (<ctrl-c> to stop)
+
+Confirm that the correct commands are reported for your 3 finger
+swipe left/right/up/down gestures, and your 2 or 3 finger pinch
+in/out gestures. Some touchpads can also support 4 finger gestures.
 
 Search for, and then start, the libinput-gestures app in your DE. It
 should also start automatically at log in and run in the background. Or
-you can start it immediately with:
+you can start it immediately in the background with:
 
     make start
 
@@ -79,17 +91,18 @@ You can stop the app with:
 
 Type the following anytime to reload your configuration file:
 
+    # cd to source dir, as above
     make restart
 
 ### UPGRADE
 
-    cd libinput-gestures        # Source dir, as above
+    # cd to source dir, as above
     git pull
     make restart
 
 ### REMOVAL
 
-    cd libinput-gestures        # Source dir, as above
+    # cd to source dir, as above
     make uninstall
 
 ### LICENSE
