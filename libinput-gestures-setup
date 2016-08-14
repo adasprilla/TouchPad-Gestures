@@ -58,33 +58,34 @@ user_action() {
 }
 
 if [ $cmd = "install" -o $cmd = "uninstall" ]; then
-    if [ "$(id -un)" != "root" ]; then
+    DESTDIR=${DESTDIR%/}
+    if [ -z "$DESTDIR" -a "$(id -un)" != "root" ]; then
 	echo "Install or uninstall must be run as sudo/root."
 	exit 1
     fi
 
     if [ $cmd = "install" ]; then
-	install -CDv -m 755 -t $BINDIR $NAME-setup
-	install -CDv -m 755 -t $BINDIR $NAME
-	install -CDv -m 644 -t $APPDIR $NAME.desktop
-	install -CDv -m 644 -t $ICODIR $NAME.png
-	install -CDv -m 644 -t $CNFDIR $NAME.conf
-	install -CDv -m 644 -t $DOCDIR README.md
+	install -CDv -m 755 -t $DESTDIR$BINDIR $NAME-setup
+	install -CDv -m 755 -t $DESTDIR$BINDIR $NAME
+	install -CDv -m 644 -t $DESTDIR$APPDIR $NAME.desktop
+	install -CDv -m 644 -t $DESTDIR$ICODIR $NAME.png
+	install -CDv -m 644 -t $DESTDIR$CNFDIR $NAME.conf
+	install -CDv -m 644 -t $DESTDIR$DOCDIR README.md
     else
-	rm -rfv $BINDIR/$NAME
-	rm -rfv $APPDIR/$NAME.desktop
-	rm -rfv $ICODIR/$NAME.png
-	rm -rfv $CNFDIR/$NAME.conf
-	rm -rfv $DOCDIR
-	rm -rfv $BINDIR/$NAME-setup
+	rm -rfv $DESTDIR$BINDIR/$NAME
+	rm -rfv $DESTDIR$APPDIR/$NAME.desktop
+	rm -rfv $DESTDIR$ICODIR/$NAME.png
+	rm -rfv $DESTDIR$CNFDIR/$NAME.conf
+	rm -rfv $DESTDIR$DOCDIR
+	rm -rfv $DESTDIR$BINDIR/$NAME-setup
     fi
 
-    if [ -x /usr/bin/update-desktop-database ]; then
+    if [ -z "$DESTDIR" -a -x /usr/bin/update-desktop-database ]; then
 	/usr/bin/update-desktop-database -q
     fi
 else
     if [ "$(id -un)" = "root" ]; then
-	echo "Non-installation commands must run as your own user."
+	echo "Non-installation commands must be run as your own user."
 	exit 1
     fi
 
