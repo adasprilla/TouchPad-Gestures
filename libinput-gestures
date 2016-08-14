@@ -2,17 +2,22 @@
 'Read gestures from libinput touchpad and action shell commands.'
 # Mark Blakeney, Sep 2015
 import os, sys, argparse, subprocess, shlex, re, getpass, fcntl
+from pathlib import Path
 
 PROG = os.path.basename(sys.argv[0])
+PATH = os.path.dirname(sys.argv[0])
 
-# Conf file containing gesture commands
-CONF = os.path.expanduser('~/.config/{}.conf'.format(PROG))
+# Conf file containing gesture commands.
+# Search first for user file then system
+CONFNAME = '{}.conf'.format(PROG)
+USERDIR = os.getenv('XDG_CONFIG_DIR', os.path.expanduser('~/.config'))
+CONFS = (Path(USERDIR, CONFNAME), Path('/etc', CONFNAME))
 
 # Set up command line arguments
 opt = argparse.ArgumentParser(description=__doc__,
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-opt.add_argument('-c', '--conffile', default=CONF,
-        help='Gestures configuration file')
+opt.add_argument('-c', '--conffile',
+        help='Gestures alternative configuration file')
 opt.add_argument('-v', '--verbose', action='store_true',
         help='Output diagnostic messages')
 opt.add_argument('-d', '--debug', action='store_true',
@@ -140,9 +145,8 @@ class PINCH(GESTURE):
 handlers = {h.name: h for h in (SWIPE(), PINCH())}
 
 def get_conf(conffile):
-    'Read configuration file'
-    count = 0
-    with open(conffile) as fp:
+    'Read configuration file, given Path'
+    with conffile.open() as fp:
         for line in fp:
             line = line.strip()
             if not line or line[0] == '#':
@@ -156,7 +160,6 @@ def get_conf(conffile):
                 fingers, ncommand = command.split(maxsplit=1)
                 handler = handlers.get(gesture.upper())
                 if handler:
-                    count += 1
 
                     # Gesture can be configured with optional specific
                     # finger count
@@ -170,8 +173,6 @@ def get_conf(conffile):
                         file=sys.stderr)
                 sys.exit(1)
 
-    return count
-
 # Make sure only one instance running for current user
 user = getpass.getuser()
 proglock = open_lock(PROG, user)
@@ -184,11 +185,21 @@ if not proglock:
 device = get_device()
 
 # Read gestures from conf file
-count = get_conf(args.conffile)
+if args.conffile:
+    get_conf(Path(args.conffile))
+else:
+    for conffile in CONFS:
+        if conffile.exists():
+            get_conf(conffile)
+            break
+    else:
+        print('No conf file {}'.format(' or '.join(
+            [str(f) for f in CONFS])), file=sys.stderr)
+        sys.exit(1)
 
 if args.verbose:
     print('{}: monitoring device {} for {} gestures'.format(PROG, device,
-        count))
+        sum([len(h.motions) for h in handlers.values()])))
 
 # Note your must "sudo gpasswd -a $USER input" then log out/in for
 # permission to access the device.

@@ -17,32 +17,13 @@ DOC = README.md
 DOCOUT = $(DOC:.md=.html)
 
 all:
-	@echo "Type make install|uninstall|start|stop|restart"
+	@echo "Type sudo make install|uninstall"
 
 install:
-	@./install.sh
+	@./libinput-gestures-setup install
 
 uninstall:
-	@./install.sh -r
-
-force_install:
-	@./install.sh -f
-
-force_uninstall:
-	@./install.sh -rf
-
-bin:
-	@./install.sh -df
-
-stop:
-	@./install.sh -s
-
-start:
-	@./install.sh -x
-
-restart:
-	@./install.sh -s
-	@./install.sh -x
+	@./libinput-gestures-setup uninstall
 
 doc:	$(DOCOUT)
 

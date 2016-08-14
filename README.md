@@ -30,18 +30,19 @@ You need libinput release 1.0 or later. Install prerequisites:
 IMPORTANT: You must be a member of the _input_ group to have permission
 to read the touchpad device:
 
-    sudo gpasswd -a $USER input  # Then log out and back in to assign this group
+    sudo gpasswd -a $USER input  # Log out and back in to assign this group
 
-Then install this software:
+Install this software:
 
     git clone http://github.com/bulletmark/libinput-gestures
     cd libinput-gestures
-    make install                # Do this as your normal user, NOT as sudo/root.
+    sudo make install
 
 ### CONFIGURATION
 
-Configure gestures in `~/.config/libinput-gestures.conf` or use the
-examples already configured. The available gestures are:
+The default gestures are in `/etc/libinput-gestures.conf`.
+Or copy that file and configure your own gestures in
+`~/.config/libinput-gestures.conf`. The available gestures are:
 
 - swipe up (e.g. map to GNOME SHELL move to prev workspace)
 - swipe down (e.g map to GNOME SHELL move to next workspace)
@@ -60,50 +61,62 @@ same gesture specified without any finger count.
 Of course, 2 finger swipes and taps are already interpreted by GNOME or
 your DE and apps for scrolling etc.
 
-IMPORTANT: Test the program. Check for reported errors, missing packages, etc:
+IMPORTANT: Test the program. Check for reported errors in your custom
+gestures, missing packages, etc:
 
-    # cd to source dir, as above
-    make stop
+    # Ensure the program is stopped
+    libinput-gestures-setup stop
 
     # Test to print out commands that would be executed:
-    ./libinput-gestures -d
+    libinput-gestures -d
     (<ctrl-c> to stop)
 
     # And/or test to print out commands as they are executed:
-    ./libinput-gestures -v
+    libinput-gestures -v
     (<ctrl-c> to stop)
 
 Confirm that the correct commands are reported for your 3 finger
 swipe left/right/up/down gestures, and your 2 or 3 finger pinch
 in/out gestures. Some touchpads can also support 4 finger gestures.
 
-Search for, and then start, the libinput-gestures app in your DE. It
-should also start automatically at log in and run in the background. Or
+### STARTING AND STOPPING
+
+Search for, and then start, the libinput-gestures app in your DE or
 you can start it immediately in the background with:
 
-    make start
+    libinput-gestures-setup start
 
-You can stop the app with:
+You can stop the background app with:
 
-    make stop
+    libinput-gestures-setup stop
+
+You can enable the app to start automatically in the background when you
+log in with:
+
+    libinput-gestures-setup autostart
+
+You can disable the app from starting automatically with:
+
+    libinput-gestures-setup autostop
 
 ### RELOAD CONFIGURATION
 
 Type the following anytime to reload your configuration file:
 
-    # cd to source dir, as above
-    make restart
+    libinput-gestures-setup restart
 
 ### UPGRADE
 
     # cd to source dir, as above
     git pull
-    make restart
+    sudo make install
+    libinput-gestures-setup restart
 
 ### REMOVAL
 
-    # cd to source dir, as above
-    make uninstall
+    libinput-gestures-setup stop
+    libinput-gestures-setup autostop
+    sudo libinput-gestures-setup uninstall
 
 ### LICENSE
 
