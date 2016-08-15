@@ -7,7 +7,8 @@ NAME=${PROG%-setup}
 
 BINDIR="/usr/bin"
 APPDIR="/usr/share/applications"
-ICODIR="/usr/share/pixmaps"
+ICODIR="/usr/share/icons/hicolor/128x128/apps"
+OCODIR="/usr/share/pixmaps"
 DOCDIR="/usr/share/doc/$NAME"
 CNFDIR="/etc"
 AUTDIR="${XDG_CONFIG_HOME:-$HOME/.config}/autostart"
@@ -63,6 +64,9 @@ if [ $cmd = "install" -o $cmd = "uninstall" ]; then
 	echo "Install or uninstall must be run as sudo/root."
 	exit 1
     fi
+
+    # Remove any old files from earlier versions of program
+    rm -f $DESTDIR$OCODIR/$NAME.png
 
     if [ $cmd = "install" ]; then
 	install -CDv -m 755 -t $DESTDIR$BINDIR $NAME-setup
