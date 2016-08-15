@@ -23,6 +23,10 @@ other DE's etc.
 
 ### INSTALLATION
 
+NOTE: Arch users can just install [_libinput-gestures from the
+AUR_](https://aur.archlinux.org/packages/libinput-gestures/). Then skip
+to the next CONFIGURATION section.
+
 You need libinput release 1.0 or later. Install prerequisites:
 
     sudo pacman -S xdotool
