@@ -23,6 +23,11 @@ other DE's etc.
 
 ### INSTALLATION
 
+IMPORTANT: You must be a member of the _input_ group to have permission
+to read the touchpad device:
+
+    sudo gpasswd -a $USER input  # Log out and back in to assign this group
+
 NOTE: Arch users can just install [_libinput-gestures from the
 AUR_](https://aur.archlinux.org/packages/libinput-gestures/). Then skip
 to the next CONFIGURATION section.
@@ -30,11 +35,6 @@ to the next CONFIGURATION section.
 You need libinput release 1.0 or later. Install prerequisites:
 
     sudo pacman -S xdotool
-
-IMPORTANT: You must be a member of the _input_ group to have permission
-to read the touchpad device:
-
-    sudo gpasswd -a $USER input  # Log out and back in to assign this group
 
 Install this software:
 
