@@ -1,15 +1,14 @@
 ### LIBINPUT-GESTURES
 
 This utility reads libinput gestures from your touchpad and maps them to
-gestures you configure in a configuration file
-`~/.config/libinput-gestures.conf`. Each gesture can be configured to
-activate a shell command which is typically an
-[_xdotool_](http://www.semicomplete.com/projects/xdotool/) command to
-action desktop/window/application keyboard combinations and commands.
-See the examples in the provided `libinput-gestures.conf` file. My
-motivation for creating this is to use triple swipe up/down to switch
-GNOME workspaces, and triple swipe left/right to go backwards/forwards
-in my browser, as per the default configuration.
+gestures you configure in a configuration file.
+Each gesture can be configured to activate a shell command which is
+typically an [_xdotool_](http://www.semicomplete.com/projects/xdotool/)
+command to action desktop/window/application keyboard combinations and
+commands. See the examples in the provided `libinput-gestures.conf`
+file. My motivation for creating this is to use triple swipe up/down to
+switch GNOME workspaces, and triple swipe left/right to go
+backwards/forwards in my browser, as per the default configuration.
 
 This small and simple utility is only intended to be used temporarily
 until GNOME and other DE's action libinput gestures natively. It parses
@@ -48,12 +47,12 @@ The default gestures are in `/etc/libinput-gestures.conf`.
 Or copy that file and configure your own gestures in
 `~/.config/libinput-gestures.conf`. The available gestures are:
 
-- swipe up (e.g. map to GNOME SHELL move to prev workspace)
-- swipe down (e.g map to GNOME SHELL move to next workspace)
+- swipe up (e.g. map to GNOME move to prev workspace)
+- swipe down (e.g map to GNOME move to next workspace)
 - swipe left (e.g. map to GNOME/Browser go back)
 - swipe right (e.g. map to GNOME/Browser go forward)
-- pinch in (e.g. map to GNOME SHELL open/close overview)
-- pinch out (e.g. map to GNOME SHELL open/close overview)
+- pinch in (e.g. map to GNOME open/close overview)
+- pinch out (e.g. map to GNOME open/close overview)
 
 You can choose to specify a specific finger count, typically 3 or 4
 fingers. If specified then the command is executed when exactly that
@@ -86,7 +85,8 @@ in/out gestures. Some touchpads can also support 4 finger gestures.
 ### STARTING AND STOPPING
 
 Search for, and then start, the libinput-gestures app in your DE or
-you can start it immediately in the background with:
+you can start it immediately in the background using the command line
+utility:
 
     libinput-gestures-setup start
 
