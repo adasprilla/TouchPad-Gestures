@@ -3,7 +3,7 @@
 # (C) Mark Blakeney, markb@berlios.de, Aug 2016.
 
 PROG="$(basename $0)"
-NAME=${PROG%-setup}
+NAME=${PROG%-*}
 
 BINDIR="/usr/bin"
 APPDIR="/usr/share/applications"
@@ -14,7 +14,9 @@ CNFDIR="/etc"
 AUTDIR="${XDG_CONFIG_HOME:-$HOME/.config}/autostart"
 
 usage() {
-    echo "Usage: $PROG install|uninstall|start|stop|autostart|autostop"
+    echo "Usage:"
+    echo "As root: sudo $PROG install|uninstall"
+    echo "As user: $PROG start|stop|autostart|autostop|status"
     exit 1
 }
 
@@ -37,8 +39,8 @@ user_action() {
 	fi
     elif [ $cmd = "stop" ]; then
 	for prog in libinput-debug-events $NAME; do
-	    if pkill -f "$prog " &>/dev/null; then
-		echo "$prog stopped"
+	    if pkill -u $USER -f "$prog\$|$prog " &>/dev/null; then
+		echo "$prog stopped."
 	    fi
 	done
     elif [ $cmd = "autostart" ]; then
@@ -53,6 +55,22 @@ user_action() {
 	fi
     elif [ $cmd = "autostop" ]; then
 	rm -fv $AUTDIR/$NAME.desktop
+    elif [ $cmd == "status" ]; then
+	if [ -f $APPDIR/$NAME.desktop ]; then
+	    echo "$NAME is installed."
+	else
+	    echo "$NAME is not installed."
+	fi
+	if [ -f $AUTDIR/$NAME.desktop ]; then
+	    echo "$NAME is set to autostart."
+	else
+	    echo "$NAME is not set to autostart."
+	fi
+	if pgrep -u $USER -f "$NAME\$|$NAME " &>/dev/null; then
+	    echo "$NAME is running."
+	else
+	    echo "$NAME is not running."
+	fi
     else
 	usage
     fi
