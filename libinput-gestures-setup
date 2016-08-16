@@ -26,6 +26,17 @@ fi
 
 cmd="$1"
 
+# Set up desktop entry link for auto start of app, if it doesn't already
+# exist
+auto_start() {
+    if ! cmp -s $APPDIR/$NAME.desktop $AUTDIR/$NAME.desktop; then
+	mkdir -p $AUTDIR
+	ln -sf -t $AUTDIR $APPDIR/$NAME.desktop
+	echo "installed or updated $AUTDIR/$NAME.desktop"
+    fi
+}
+
+# Action given user command
 user_action() {
     local cmd=$1
 
@@ -48,11 +59,7 @@ user_action() {
 	    echo "$NAME is not installed."
 	    exit 1
 	fi
-	if ! cmp -s $APPDIR/$NAME.desktop $AUTDIR/$NAME.desktop; then
-	    mkdir -p $AUTDIR
-	    ln -sf -t $AUTDIR $APPDIR/$NAME.desktop
-	    echo "installed or updated $AUTDIR/$NAME.desktop"
-	fi
+	auto_start
     elif [ $cmd = "autostop" ]; then
 	rm -fv $AUTDIR/$NAME.desktop
     elif [ $cmd == "status" ]; then
@@ -116,6 +123,20 @@ else
     rm -fv ~/.local/bin/$NAME
     rm -fv ~/.local/share/applications/$NAME.desktop
     rm -fv ~/.local/share/icons/$NAME.png
+
+    # Look for and update any autostart file if it is not a link and/or
+    # not pointing the the latest desktop entry.
+    if [ -e $AUTDIR/$NAME.desktop -o -L $AUTDIR/$NAME.desktop ]; then
+	if [ -f $APPDIR/$NAME.desktop ] ; then
+	    if [ ! -L $AUTDIR/$NAME.desktop ]; then
+		rm -f $AUTDIR/$NAME.desktop
+	    fi
+	    auto_start
+	else
+	    echo "Removed old $AUTDIR/$NAME.desktop"
+	    rm -f $AUTDIR/$NAME.desktop
+	fi
+    fi
 
     if [ $cmd = "restart" ]; then
 	user_action "stop"
