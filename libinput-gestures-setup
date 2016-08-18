@@ -16,7 +16,7 @@ AUTDIR="${XDG_CONFIG_HOME:-$HOME/.config}/autostart"
 usage() {
     echo "Usage:"
     echo "As root: sudo $PROG install|uninstall"
-    echo "As user: $PROG start|stop|autostart|autostop|status"
+    echo "As user: $PROG start|stop|restart|autostart|autostop|status"
     exit 1
 }
 
@@ -25,6 +25,27 @@ if [ $# -ne 1 ]; then
 fi
 
 cmd="$1"
+
+# Launch given desktop app. First work out most suitable launcher.
+# Pretty crude at present but should work for at least GNOME and KDE.
+launch() {
+    local app="$1"
+
+    if echo $XDG_CURRENT_DESKTOP | grep -q KDE; then
+	if which kioclient &>/dev/null; then
+	    kioclient exec "$APPDIR/$app.desktop" >/dev/null
+	    return $?
+	fi
+    fi
+
+    if which gtk-launch &>/dev/null; then
+	gtk-launch "$app"
+	return $?
+    fi
+
+    echo "Don't know how to start $app" >&2
+    return 1
+}
 
 # Set up desktop entry link for auto start of app, if it doesn't already
 # exist
@@ -45,7 +66,7 @@ user_action() {
 	    echo "$NAME is not installed."
 	    exit 1
 	fi
-	if gtk-launch "$NAME"; then
+	if launch "$NAME"; then
 	    echo "$NAME started."
 	fi
     elif [ $cmd = "stop" ]; then
