@@ -20,10 +20,10 @@ all:
 	@echo "Type sudo make install|uninstall"
 
 install:
-	@DESTDIR=$(DESTDIR) ./libinput-gestures-setup install
+	@./libinput-gestures-setup -d "$(DESTDIR)" install
 
 uninstall:
-	@DESTDIR=$(DESTDIR) ./libinput-gestures-setup uninstall
+	@./libinput-gestures-setup -d "$(DESTDIR)" uninstall
 
 doc:	$(DOCOUT)
 
