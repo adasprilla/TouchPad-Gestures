@@ -1,14 +1,15 @@
 ### LIBINPUT-GESTURES
 
-This utility reads libinput gestures from your touchpad and maps them to
-gestures you configure in a configuration file.
-Each gesture can be configured to activate a shell command which is
-typically an [_xdotool_](http://www.semicomplete.com/projects/xdotool/)
-command to action desktop/window/application keyboard combinations and
-commands. See the examples in the provided `libinput-gestures.conf`
-file. My motivation for creating this is to use triple swipe up/down to
-switch GNOME workspaces, and triple swipe left/right to go
-backwards/forwards in my browser, as per the default configuration.
+[Libinput-gestures](https://github.com/bulletmark/libinput-gestures) is
+a utility which reads libinput gestures from your touchpad and maps them
+to gestures you configure in a configuration file. Each gesture can be
+configured to activate a shell command which is typically an
+[_xdotool_](http://www.semicomplete.com/projects/xdotool/) command to
+action desktop/window/application keyboard combinations and commands.
+See the examples in the provided `libinput-gestures.conf` file. My
+motivation for creating this is to use triple swipe up/down to switch
+GNOME workspaces, and triple swipe left/right to go backwards/forwards
+in my browser, as per the default configuration.
 
 This small and simple utility is only intended to be used temporarily
 until GNOME and other DE's action libinput gestures natively. It parses
@@ -19,6 +20,9 @@ format.
 This utility is developed and tested on Arch linux with the GNOME 3 DE
 on Xorg. I am not sure how well this will work on other distros and
 other DE's etc.
+
+The latest version and documentation is available at
+http://github.com/bulletmark/libinput-gestures.
 
 ### INSTALLATION
 
