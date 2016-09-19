@@ -107,13 +107,13 @@ You can disable the app from starting automatically with:
 
     libinput-gestures-setup autostop
 
-You can check the status of the app with:
-
-    libinput-gestures-setup status
-
 You can restart the app or reload the configuration file with:
 
     libinput-gestures-setup restart
+
+You can check the status of the app with:
+
+    libinput-gestures-setup status
 
 ### UPGRADE
 
