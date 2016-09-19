@@ -111,9 +111,7 @@ You can check the status of the app with:
 
     libinput-gestures-setup status
 
-### RELOAD CONFIGURATION
-
-Type the following anytime to reload your configuration file:
+You can restart the app or reload the configuration file with:
 
     libinput-gestures-setup restart
 
