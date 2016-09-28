@@ -38,9 +38,19 @@ def open_lock(*args):
 
     return fp
 
+def run(func, *args, **kwargs):
+    'Run given subprocess function and return result'
+    try:
+        res = func(*args, **kwargs)
+    except Exception as e:
+        print(e, file=sys.stderr)
+        sys.exit(1)
+
+    return res
+
 def get_device():
     'Determine libinput touchpad device path'
-    out = subprocess.check_output('libinput-list-devices',
+    out = run(subprocess.check_output, 'libinput-list-devices',
             universal_newlines=True)
 
     dev = None
@@ -95,7 +105,7 @@ class GESTURE:
                 print('  ', ' '.join(command))
 
         if command and not args.debug:
-            subprocess.check_call(command)
+            run(subprocess.check_call, command)
 
 class SWIPE(GESTURE):
     'Class to handle this type of gesture'
@@ -205,7 +215,7 @@ if args.verbose:
 # permission to access the device.
 command = 'stdbuf -oL -- libinput-debug-events --device {}'.format(device)
 
-cmd = subprocess.Popen(shlex.split(command), stdout=subprocess.PIPE,
+cmd = run(subprocess.Popen, shlex.split(command), stdout=subprocess.PIPE,
         universal_newlines=True, bufsize=0)
 
 # Sit in a loop forever reading the libinput debug output for GESTURES ..
