@@ -20,6 +20,9 @@ opt.add_argument('-c', '--conffile',
         help='Gestures alternative configuration file')
 opt.add_argument('-v', '--verbose', action='store_true',
         help='Output diagnostic messages')
+opt.add_argument('-r', '--raw', action='store_true',
+        help='Output raw libinput-debug-event messages only, '
+        'do not action gestures')
 opt.add_argument('-d', '--debug', action='store_true',
         help='Output diagnostic messages only, do not action gestures')
 args = opt.parse_args()
@@ -195,21 +198,22 @@ if not proglock:
 device = get_device()
 
 # Read gestures from conf file
-if args.conffile:
-    get_conf(Path(args.conffile))
-else:
-    for conffile in CONFS:
-        if conffile.exists():
-            get_conf(conffile)
-            break
+if not args.raw:
+    if args.conffile:
+        get_conf(Path(args.conffile))
     else:
-        print('No conf file {}'.format(' or '.join(
-            [str(f) for f in CONFS])), file=sys.stderr)
-        sys.exit(1)
+        for conffile in CONFS:
+            if conffile.exists():
+                get_conf(conffile)
+                break
+        else:
+            print('No conf file {}'.format(' or '.join(
+                [str(f) for f in CONFS])), file=sys.stderr)
+            sys.exit(1)
 
-if args.verbose:
-    print('{}: monitoring device {} for {} gestures'.format(PROG, device,
-        sum([len(h.motions) for h in handlers.values()])))
+    if args.verbose:
+        print('{}: monitoring device {} for {} gestures'.format(PROG, device,
+            sum([len(h.motions) for h in handlers.values()])))
 
 # Note your must "sudo gpasswd -a $USER input" then log out/in for
 # permission to access the device.
@@ -221,6 +225,13 @@ cmd = run(subprocess.Popen, shlex.split(command), stdout=subprocess.PIPE,
 # Sit in a loop forever reading the libinput debug output for GESTURES ..
 handler = None
 for line in cmd.stdout:
+
+    # Just output raw messages if in that debug mode
+    if args.raw:
+        print(line.strip())
+        continue
+
+    # Only interested in gestures
     if 'GESTURE_' not in line:
         continue
 
