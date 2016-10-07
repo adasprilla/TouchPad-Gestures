@@ -154,6 +154,36 @@ class PINCH(GESTURE):
 # table based on their name.
 handlers = {h.name: h for h in (SWIPE(), PINCH())}
 
+def read_line(line):
+    'Process a single line in conf file'
+    fields = line.split(maxsplit=3)
+
+    # Look for configured gesture. Sanity check the line.
+    if len(fields) < 4:
+        return 'Invalid gesture line'
+
+    key, gesture, motion, command = fields
+
+    if key != 'gesture:':
+        return 'Configuration command "{}" is not supported'.format(key)
+
+    handler = handlers.get(gesture.upper())
+    if not handler:
+        return 'Gesture "{}" is not supported'.format(gesture)
+
+    # Gesture command can be configured with optional specific finger
+    # count so look for that
+    fingers = None
+    fcommand = command.split(maxsplit=1)
+    if len(fcommand) > 1:
+        fcount, ncommand = fcommand
+        if fcount.isdigit() and len(fcount) == 1:
+            command = ncommand
+            fingers = fcount
+
+    # Add the configured gesture
+    return handler.add(motion.lower(), fingers, command)
+
 def get_conf(conffile):
     'Read configuration file, given path. Returns True if file exists.'
     if not conffile.exists():
@@ -165,24 +195,7 @@ def get_conf(conffile):
             if not line or line[0] == '#':
                 continue
 
-            key, data = line.split(maxsplit=1)
-
-            errmsg = None
-            if key == 'gesture:':
-                gesture, motion, command = data.split(maxsplit=2)
-                fingers, ncommand = command.split(maxsplit=1)
-                handler = handlers.get(gesture.upper())
-                if handler:
-
-                    # Gesture can be configured with optional specific
-                    # finger count
-                    if fingers.isdigit() and len(fingers) == 1:
-                        errmsg = handler.add(motion.lower(), fingers, ncommand)
-                    else:
-                        errmsg = handler.add(motion.lower(), None, command)
-                else:
-                    errmsg = 'Gesture "{}" is not supported'.format(gesture)
-
+            errmsg = read_line(line)
             if errmsg:
                 print('Error in file {} at line:\n{}.\n{}.'.format(
                     conffile, line, errmsg), file=sys.stderr)
