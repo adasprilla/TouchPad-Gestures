@@ -5,6 +5,7 @@ import os, sys, argparse, subprocess, shlex, re, getpass, fcntl
 from pathlib import Path
 
 PROG = Path(sys.argv[0]).name
+ISWAYLAND = os.getenv('WAYLAND_DISPLAY')
 
 # Conf file containing gesture commands.
 # Search first for user file then system file.
@@ -89,7 +90,12 @@ class GESTURE:
                     self.name)
 
         key = (motion, fingers) if fingers else motion
-        self.motions[key] = shlex.split(command)
+        cmd = shlex.split(command)
+
+        if cmd[0].endswith('xdotool') and ISWAYLAND:
+            return 'Sorry but xdotool is not supported by Wayland'
+
+        self.motions[key] = cmd
         return None
 
     def action(self, motion):
@@ -154,7 +160,7 @@ class PINCH(GESTURE):
 # table based on their name.
 handlers = {h.name: h for h in (SWIPE(), PINCH())}
 
-def read_line(line):
+def get_conf_line(line):
     'Process a single line in conf file'
     fields = line.split(maxsplit=3)
 
@@ -195,7 +201,7 @@ def get_conf(conffile):
             if not line or line[0] == '#':
                 continue
 
-            errmsg = read_line(line)
+            errmsg = get_conf_line(line)
             if errmsg:
                 print('Error in file {} at line:\n{}.\n{}.'.format(
                     conffile, line, errmsg), file=sys.stderr)
