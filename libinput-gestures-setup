@@ -66,7 +66,7 @@ launch() {
 auto_start() {
     if ! cmp -s $APPDIR/$NAME.desktop $AUTDIR/$NAME.desktop; then
 	mkdir -p $AUTDIR
-	ln -sf -t $AUTDIR $APPDIR/$NAME.desktop
+	cp $APPDIR/$NAME.desktop $AUTDIR
 	echo "installed or updated $AUTDIR/$NAME.desktop"
     fi
 }
@@ -164,18 +164,15 @@ else
     rm -fv ~/.local/share/applications/$NAME.desktop
     rm -fv ~/.local/share/icons/$NAME.png
 
-    # Look for and update any autostart file if it is not a link and/or
-    # not pointing the the latest desktop entry.
-    if [ -e $AUTDIR/$NAME.desktop -o -L $AUTDIR/$NAME.desktop ]; then
-	if [ -f $APPDIR/$NAME.desktop ] ; then
-	    if [ ! -L $AUTDIR/$NAME.desktop ]; then
-		rm -f $AUTDIR/$NAME.desktop
-	    fi
-	    auto_start
-	else
-	    echo "Removed old $AUTDIR/$NAME.desktop"
+    # Look for and update any autostart file if it is a link or not
+    # pointing to the latest desktop entry. Apparently user autostart
+    # files should not be symlinks to system dir files.
+    if [ -e $AUTDIR/$NAME.desktop ]; then
+	if [ -L $AUTDIR/$NAME.desktop ]; then
+	    echo "Removed old $AUTDIR/$NAME.desktop link"
 	    rm -f $AUTDIR/$NAME.desktop
 	fi
+	auto_start
     fi
 
     if [ $cmd = "restart" ]; then
