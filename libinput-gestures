@@ -5,7 +5,6 @@ import os, sys, argparse, subprocess, shlex, re, getpass, fcntl
 from pathlib import Path
 
 PROG = Path(sys.argv[0]).name
-ISWAYLAND = 'wayland' in os.getenv('XDG_SESSION_TYPE', '').lower()
 
 # Conf file containing gesture commands.
 # Search first for user file then system file.
@@ -88,12 +87,7 @@ class GESTURE:
                     self.name)
 
         key = (motion, fingers) if fingers else motion
-        cmd = shlex.split(command)
-
-        if cmd[0].endswith('xdotool') and ISWAYLAND:
-            return 'Sorry but xdotool is not supported by Wayland'
-
-        self.motions[key] = cmd
+        self.motions[key] = shlex.split(command)
         return None
 
     def action(self, motion):
@@ -189,7 +183,10 @@ def get_conf_line(line):
     return handler.add(motion.lower(), fingers, command)
 
 def get_conf(conffile):
-    'Read configuration file, given path. Returns True if file exists.'
+    '''
+    Read configuration file, given path. Returns True if file exists and
+    was read.
+    '''
     if not conffile.exists():
         return False
 
