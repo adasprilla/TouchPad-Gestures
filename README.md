@@ -37,7 +37,16 @@ to the next CONFIGURATION section.
 
 You need libinput release 1.0 or later. Install prerequisites:
 
+    # On Arch:
     sudo pacman -S xdotool
+
+    # Or, on Debian based systems, e.g. Ubuntu:
+    sudo apt-get install xdotool
+
+Debian and Ubuntu users also need to install `libinput-tools` if that
+package exists in your release:
+
+    sudo apt-get install libinput-tools
 
 Install this software:
 
