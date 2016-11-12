@@ -43,16 +43,37 @@ def open_lock(*args):
 def run(func, *args, **kwargs):
     'Run given subprocess function and return result'
     try:
-        res = func(*args, **kwargs)
+        res = func(*args, **kwargs, universal_newlines=True)
     except Exception as e:
         sys.exit(e)
 
     return res
 
+def internal(args):
+    'Internal command handler.'
+    # Commands currently supported are:
+    commands = (
+        'ws_up',
+        'ws_down',
+    )
+    # Set up command line arguments
+    opti = argparse.ArgumentParser(description=__doc__)
+    opti.add_argument('action', choices=commands,
+            help='Internal command to action')
+    argsi = opti.parse_args(args)
+
+    # Get list of current workspaces
+    res = run(subprocess.check_output, ['wmctrl', '-d']).strip().splitlines()
+    lines = [l.split(maxsplit=3)[1] for l in res]
+    index = lines.index('*') + (1 if argsi.action == 'ws_up' else -1)
+
+    # Switch to desired workspace
+    if index >= 0 and index < len(lines):
+        run(subprocess.check_call, ['wmctrl', '-s', str(index)])
+
 def get_device():
     'Determine libinput touchpad device path'
-    out = run(subprocess.check_output, 'libinput-list-devices',
-            universal_newlines=True)
+    out = run(subprocess.check_output, 'libinput-list-devices')
 
     dev = None
     for line in out.splitlines():
@@ -103,7 +124,10 @@ class GESTURE:
                 print('  ', ' '.join(command))
 
         if command and not args.debug:
-            run(subprocess.check_call, command)
+            if command[0] == '_internal':
+                internal(command[1:])
+            else:
+                run(subprocess.check_call, command)
 
 class SWIPE(GESTURE):
     'Class to handle this type of gesture'
@@ -234,7 +258,7 @@ if not args.raw:
 command = 'stdbuf -oL -- libinput-debug-events --device {}'.format(device)
 
 cmd = run(subprocess.Popen, shlex.split(command), stdout=subprocess.PIPE,
-        universal_newlines=True, bufsize=0)
+        bufsize=0)
 
 # Sit in a loop forever reading the libinput debug output for GESTURES ..
 handler = None

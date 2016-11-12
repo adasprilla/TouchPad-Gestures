@@ -38,10 +38,10 @@ to the next CONFIGURATION section.
 You need libinput release 1.0 or later. Install prerequisites:
 
     # On Arch:
-    sudo pacman -S xdotool
+    sudo pacman -S xdotool wmctrl
 
     # Or, on Debian based systems, e.g. Ubuntu:
-    sudo apt-get install xdotool
+    sudo apt-get install xdotool wmctrl
 
 Debian and Ubuntu users also need to install `libinput-tools` if that
 package exists in your release:
@@ -136,6 +136,18 @@ You can check the status of the app with:
     libinput-gestures-setup stop
     libinput-gestures-setup autostop
     sudo libinput-gestures-setup uninstall
+
+### WAYLAND NOTES
+
+This utility exploits `xdotool` which unfortunately only works with X11/Xorg
+based applications. So keyboard shortcuts for the desktop do not
+work under GNOME on Wayland which is now the default since GNOME 3.22.
+However, it seems that `wmctrl` EWMH commands do work under GNOME on
+Wayland so this utility adds an `_internal` command which can be used to
+switch workspaces using the swipe up and down commands. The `_internal`
+command uses `wmctrl` to work out which is the current workspace and
+then selects the next one. Since this works under Wayland and Xorg, it is
+now the default configuration for swipe up and down commands.
 
 ### LICENSE
 
