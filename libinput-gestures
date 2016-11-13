@@ -58,6 +58,10 @@ def internal(args):
     )
     # Set up command line arguments
     opti = argparse.ArgumentParser(description=__doc__)
+    opti.add_argument('--row', type=int,
+            help='Step along the row for this number in a row')
+    opti.add_argument('--col', type=int,
+            help='Step along the column for this number in a column')
     opti.add_argument('action', choices=commands,
             help='Internal command to action')
     argsi = opti.parse_args(args)
@@ -65,10 +69,20 @@ def internal(args):
     # Get list of current workspaces
     res = run(subprocess.check_output, ['wmctrl', '-d']).strip().splitlines()
     lines = [l.split(maxsplit=3)[1] for l in res]
-    index = lines.index('*') + (1 if argsi.action == 'ws_up' else -1)
+    index = lines.index('*')
+
+    if argsi.row:
+        minindex = index - (index % argsi.row)
+        maxindex = minindex + argsi.row
+        count = 1
+    else:
+        minindex = 0
+        maxindex = len(lines)
+        count = (maxindex // argsi.col) if argsi.col else 1
 
     # Switch to desired workspace
-    if index >= 0 and index < len(lines):
+    index += count if argsi.action == 'ws_up' else -count
+    if index >= minindex and index < maxindex:
         run(subprocess.check_call, ['wmctrl', '-s', str(index)])
 
 def get_device():
