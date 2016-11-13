@@ -56,6 +56,15 @@ Install this software:
 
 ### CONFIGURATION
 
+Many users will be happy with the default configuration in which case
+you can just type the following and you are ready to go:
+
+    libinput-gestures-setup start
+    libinput-gestures-setup autostart
+
+Otherwise, if you want to create your own custom gestures etc, keep
+reading ..
+
 The default gestures are in `/etc/libinput-gestures.conf`.
 Or copy that file and configure your own gestures in
 `~/.config/libinput-gestures.conf`. The available gestures are:
