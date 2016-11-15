@@ -65,9 +65,10 @@ you can just type the following and you are ready to go:
 Otherwise, if you want to create your own custom gestures etc, keep
 reading ..
 
-The default gestures are in `/etc/libinput-gestures.conf`.
-Or copy that file and configure your own gestures in
-`~/.config/libinput-gestures.conf`. The available gestures are:
+The default gestures are in `/etc/libinput-gestures.conf`. If you want
+to create your own custom gestures then copy that file to
+`~/.config/libinput-gestures.conf` and edit it. The available gestures
+are:
 
 - swipe up (e.g. map to GNOME move to prev workspace)
 - swipe down (e.g map to GNOME move to next workspace)
@@ -155,9 +156,9 @@ not work under GNOME on Wayland which is now the default since GNOME
 on Wayland so this utility adds an `_internal` command which can be used
 to switch workspaces using the swipe commands. The `_internal` command
 uses `wmctrl` to work out which is the current workspace and then
-selects the next one. Since this works under Wayland and Xorg (and using
-KDE and all other EWMH compliant desktops), it is now the default
-configuration for swipe up and down commands.
+selects the next one. Since this works on both Wayland and Xorg (and
+with GNOME, KDE, and other EWMH compliant desktops), it is now the
+default configuration command for swipe up and down commands.
 
 ### LICENSE
 
