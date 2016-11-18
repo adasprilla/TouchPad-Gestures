@@ -40,14 +40,23 @@ def open_lock(*args):
 
     return fp
 
-def run(func, *args, **kwargs):
-    'Run given subprocess function and return result'
+def run(*args, check=True, **kwargs):
+    'Run subprocess function and return result'
+    # Maintain compatability with python 3.4.
+    class result: pass
+    result.stdout = None
+    result.stderr = None
+    result.returncode = 0
     try:
-        res = func(*args, **kwargs, universal_newlines=True)
+        result.stdout = subprocess.check_output(*args, **kwargs,
+                stderr=subprocess.DEVNULL, universal_newlines=True)
     except Exception as e:
-        sys.exit(e)
+        result.stderr = str(e)
+        result.returncode = 1
+        if check:
+            print(result.stderr, file=sys.stderr)
 
-    return res
+    return result
 
 def internal(args):
     'Internal command handler.'
@@ -67,8 +76,15 @@ def internal(args):
     argsi = opti.parse_args(args)
 
     # Get list of current workspaces
-    res = run(subprocess.check_output, ['wmctrl', '-d']).strip().splitlines()
-    lines = [l.split(maxsplit=3)[1] for l in res]
+    res = run(['wmctrl', '-d'], check=False)
+    if res.returncode != 0:
+        # This command can fail on GNOME when you have only a single
+        # dynamic workspace using Xorg (probably a GNOME bug) so let's
+        # just ignore it.
+        return
+
+    out = res.stdout.strip().splitlines()
+    lines = [l.split(maxsplit=3)[1] for l in out]
     index = lines.index('*')
 
     if argsi.row:
@@ -83,28 +99,28 @@ def internal(args):
     # Switch to desired workspace
     index += count if argsi.action == 'ws_up' else -count
     if index >= minindex and index < maxindex:
-        run(subprocess.check_call, ['wmctrl', '-s', str(index)])
+        run(['wmctrl', '-s', str(index)])
 
 def get_device():
     'Determine libinput touchpad device path'
-    out = run(subprocess.check_output, 'libinput-list-devices')
+    res = run('libinput-list-devices')
+    if res.returncode == 0:
+        dev = None
+        for line in res.stdout.splitlines():
+            line = line.strip()
+            if not line or ':' not in line:
+                continue
 
-    dev = None
-    for line in out.splitlines():
-        line = line.strip()
-        if not line or ':' not in line:
-            continue
+            key, value = line.split(':', maxsplit=1)
+            key = key.strip()
+            value = value.strip()
 
-        key, value = line.split(':', maxsplit=1)
-        key = key.strip()
-        value = value.strip()
-
-        # Assume that any device that has any Tap-to-click value is a
-        # touchpad.
-        if key == 'Kernel':
-            dev = value
-        elif key == 'Tap-to-click' and value != 'n/a' and dev:
-            return dev
+            # Assume that any device that has any Tap-to-click value is a
+            # touchpad.
+            if key == 'Kernel':
+                dev = value
+            elif key == 'Tap-to-click' and value != 'n/a' and dev:
+                return dev
 
     sys.exit('Could not determine touchpad device.')
 
@@ -141,7 +157,7 @@ class GESTURE:
             if command[0] == '_internal':
                 internal(command[1:])
             else:
-                run(subprocess.check_call, command)
+                run(command)
 
 class SWIPE(GESTURE):
     'Class to handle this type of gesture'
@@ -271,8 +287,8 @@ if not args.raw:
 # permission to access the device.
 command = 'stdbuf -oL -- libinput-debug-events --device {}'.format(device)
 
-cmd = run(subprocess.Popen, shlex.split(command), stdout=subprocess.PIPE,
-        bufsize=0)
+cmd = subprocess.Popen(shlex.split(command), stdout=subprocess.PIPE,
+        bufsize=0, universal_newlines=True)
 
 # Sit in a loop forever reading the libinput debug output for GESTURES ..
 handler = None
