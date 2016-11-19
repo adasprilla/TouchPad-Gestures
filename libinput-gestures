@@ -81,7 +81,8 @@ def internal(args):
     if res.returncode != 0:
         # This command can fail on GNOME when you have only a single
         # dynamic workspace using Xorg (probably a GNOME bug) so let's
-        # just ignore it.
+        # just ignore it given there is no other workspace to switch to
+        # anyhow.
         return
 
     out = res.stdout.strip().splitlines()
@@ -270,17 +271,20 @@ device = get_device()
 # else look in user dir then system dir.
 if not args.raw:
     if args.conffile:
-        if not get_conf(Path(args.conffile)):
+        conf = Path(args.conffile)
+        if not get_conf(conf):
             sys.exit('Conf file "{}" does not exist.'.format(args.conffile))
     else:
         for confdir in CONFDIRS:
-            if get_conf(Path(confdir, CONFNAME)):
+            conf = Path(confdir, CONFNAME)
+            if get_conf(conf):
                 break
         else:
             sys.exit('No file {} in {}.'.format(CONFNAME,
                 ' or '.join(CONFDIRS)))
 
     if args.verbose:
+        print('{}: using {}'.format(PROG, conf))
         print('{}: monitoring device {} for {} gestures'.format(PROG, device,
             sum([len(h.motions) for h in handlers.values()])))
 
