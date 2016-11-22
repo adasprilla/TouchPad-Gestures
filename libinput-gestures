@@ -295,7 +295,8 @@ if not args.raw:
                 ' or '.join(CONFDIRS)))
 
     if args.verbose:
-        print('{}: using {}'.format(PROG, conf))
+        print('{}: using {}, session {}'.format(PROG, conf,
+            os.getenv('XDG_SESSION_TYPE', 'unknown')))
         print('{}: monitoring device {} for {} gestures'.format(PROG, device,
             sum([len(h.motions) for h in handlers.values()])))
 
