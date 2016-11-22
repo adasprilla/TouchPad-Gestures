@@ -68,6 +68,8 @@ def internal(args):
     )
     # Set up command line arguments
     opti = argparse.ArgumentParser(description=__doc__)
+    opti.add_argument('-w', '--wrap', action='store_true',
+            help='Wrap workspaces when switching to/from start/end')
     opti.add_argument('--row', type=int,
             help='Step along the row for this number in a row')
     opti.add_argument('--col', type=int,
@@ -100,6 +102,12 @@ def internal(args):
 
     # Switch to desired workspace
     index += count if argsi.action == 'ws_up' else -count
+    if argsi.wrap:
+        if index == minindex - count:
+            index = maxindex - count
+        elif index >= maxindex:
+            index = minindex
+
     if index >= minindex and index < maxindex:
         run(['wmctrl', '-s', str(index)])
 
