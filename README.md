@@ -150,15 +150,16 @@ You can check the status of the app with:
 ### WAYLAND AND OTHER NOTES
 
 This utility exploits `xdotool` which unfortunately only works with
-X11/Xorg based applications. So keyboard shortcuts for the desktop do
+X11/Xorg based applications. So `xdotool` shortcuts for the desktop do
 not work under GNOME on Wayland which is now the default since GNOME
-3.22. However, it seems that `wmctrl` EWMH commands do work under GNOME
-on Wayland so this utility adds an `_internal` command which can be used
-to switch workspaces using the swipe commands. The `_internal` command
-uses `wmctrl` to work out which is the current workspace and then
-selects the next one. Since this works on both Wayland and Xorg (and
-with GNOME, KDE, and other EWMH compliant desktops), it is now the
-default configuration command for swipe up and down commands.
+3.22. However, it seems that `wmctrl` desktop selection commands do work
+under GNOME on Wayland (via XWayland) so this utility adds an `_internal`
+command which can be used to switch workspaces using the swipe commands.
+The `_internal` `ws_up` and `ws_down` commands use `wmctrl` to work out
+the current workspace and select the next one. Since this works on both
+Wayland and Xorg (and with GNOME, KDE, and other EWMH compliant
+desktops), it is now the default configuration command for swipe up and
+down commands.
 
 ### LICENSE
 
