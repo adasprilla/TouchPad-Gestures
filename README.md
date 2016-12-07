@@ -17,9 +17,11 @@ the output of the _libinput-list-devices_ and _libinput-debug-events_
 utilties so is a little fragile to any version changes in their output
 format.
 
-This utility is developed and tested on Arch linux with the GNOME 3 DE
-on Xorg. I am not sure how well this will work on other distros and
-other DE's etc.
+This utility is developed and tested on Arch linux using the GNOME 3 DE
+on Xorg and Wayland. It works somewhat incompletely on Wayland (via
+XWayland). See the WAYLAND section below and the comments in the default
+`libinput-gestures.conf` file. It should work with KDE etc but I am not
+sure how well this will work on all distros and DE's etc.
 
 The latest version and documentation is available at
 http://github.com/bulletmark/libinput-gestures.
@@ -155,14 +157,21 @@ You can check the status of the app with:
 This utility exploits `xdotool` which unfortunately only works with
 X11/Xorg based applications. So `xdotool` shortcuts for the desktop do
 not work under GNOME on Wayland which is now the default since GNOME
-3.22. However, it seems that `wmctrl` desktop selection commands do work
-under GNOME on Wayland (via XWayland) so this utility adds an `_internal`
-command which can be used to switch workspaces using the swipe commands.
+3.22. However, it is found that `wmctrl` desktop selection commands do work
+under GNOME on Wayland (via XWayland) so this utility adds a built-in
+`_internal` command which can be used to switch workspaces using the
+swipe commands.
 The `_internal` `ws_up` and `ws_down` commands use `wmctrl` to work out
 the current workspace and select the next one. Since this works on both
-Wayland and Xorg (and with GNOME, KDE, and other EWMH compliant
-desktops), it is now the default configuration command for swipe up and
-down commands.
+Wayland and Xorg, and with GNOME, KDE, and other EWMH compliant
+desktops, it is now the default configuration command for swipe up and
+down commands in `libinput-gestures.conf`. See the comments in that file
+about other options you can do with the `_internal` command.
+
+Of course, `xdotool` commands do work via Xwayland for Xorg based apps
+so, for example, page forward/back swipe gestures do work for Firefox
+and Chrome browsers when running on Wayland as per the default
+configuration.
 
 ### LICENSE
 
