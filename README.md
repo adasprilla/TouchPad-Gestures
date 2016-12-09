@@ -8,8 +8,8 @@ configured to activate a shell command which is typically an
 action desktop/window/application keyboard combinations and commands.
 See the examples in the provided `libinput-gestures.conf` file. My
 motivation for creating this is to use triple swipe up/down to switch
-GNOME workspaces, and triple swipe left/right to go backwards/forwards
-in my browser, as per the default configuration.
+workspaces, and triple swipe right/left to go backwards/forwards in my
+browser, as per the default configuration.
 
 This small and simple utility is only intended to be used temporarily
 until GNOME and other DE's action libinput gestures natively. It parses
@@ -75,10 +75,10 @@ to create your own custom gestures then copy that file to
 `~/.config/libinput-gestures.conf` and edit it. The available gestures
 are:
 
-- swipe up (e.g. map to GNOME move to prev workspace)
-- swipe down (e.g map to GNOME move to next workspace)
-- swipe left (e.g. map to GNOME/Browser go back)
-- swipe right (e.g. map to GNOME/Browser go forward)
+- swipe up (e.g. map to GNOME/KDE/etc move to next workspace)
+- swipe down (e.g map to GNOME/KDE/etc move to prev workspace)
+- swipe left (e.g. map to Web browser go forward)
+- swipe right (e.g. map to Web browser go back)
 - pinch in (e.g. map to GNOME open/close overview)
 - pinch out (e.g. map to GNOME open/close overview)
 
@@ -89,8 +89,8 @@ command is executed when that gesture is executed with any number of
 fingers. Gestures specified with finger count have priority over the
 same gesture specified without any finger count.
 
-Of course, 2 finger swipes and taps are already interpreted by GNOME or
-your DE and apps for scrolling etc.
+Of course, 2 finger swipes and taps are already interpreted by your DE
+and apps for scrolling etc.
 
 IMPORTANT: Test the program. Check for reported errors in your custom
 gestures, missing packages, etc:
@@ -107,7 +107,7 @@ gestures, missing packages, etc:
     (<ctrl-c> to stop)
 
 Confirm that the correct commands are reported for your 3 finger
-swipe left/right/up/down gestures, and your 2 or 3 finger pinch
+swipe up/down/left/right gestures, and your 2 or 3 finger pinch
 in/out gestures. Some touchpads can also support 4 finger gestures.
 
 ### STARTING AND STOPPING
