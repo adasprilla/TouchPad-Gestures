@@ -13,8 +13,7 @@ USERDIR = os.getenv('XDG_CONFIG_DIR', os.path.expanduser('~/.config'))
 CONFDIRS = (USERDIR, '/etc')
 
 # Set up command line arguments
-opt = argparse.ArgumentParser(description=__doc__,
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+opt = argparse.ArgumentParser(description=__doc__)
 opt.add_argument('-c', '--conffile',
         help='Gestures alternative configuration file')
 opt.add_argument('-v', '--verbose', action='store_true',
@@ -22,6 +21,8 @@ opt.add_argument('-v', '--verbose', action='store_true',
 opt.add_argument('-r', '--raw', action='store_true',
         help='Output raw libinput-debug-event messages only, '
         'do not action gestures')
+opt.add_argument('--device',
+        help='device name to use, explicitly specified')
 opt.add_argument('-d', '--debug', action='store_true',
         help='Output diagnostic messages only, do not action gestures')
 args = opt.parse_args()
@@ -111,10 +112,11 @@ def internal(args):
     if index >= minindex and index < maxindex:
         run(['wmctrl', '-s', str(index)])
 
-def get_device():
-    'Determine libinput touchpad device path'
+def get_device(name):
+    'Determine libinput touchpad device (path, name)'
     res = run('libinput-list-devices')
     if res.returncode == 0:
+        devname = None
         dev = None
         has_size = False
         for line in res.stdout.splitlines():
@@ -127,13 +129,18 @@ def get_device():
             value = value.strip()
 
             # Look for touchpad
-            if key == 'Kernel':
+            if key == 'Device':
+                devname = value
+            elif key == 'Kernel':
                 dev = value
+                if devname and devname == name:
+                    return dev, devname
                 has_size = False
             elif key == 'Size' and dev:
                 has_size = True
-            elif key == 'Capabilities' and value == 'pointer' and has_size:
-                return dev
+            elif key == 'Capabilities' and value == 'pointer' and has_size \
+                    and not name:
+                return dev, devname
 
     sys.exit('Could not determine touchpad device.')
 
@@ -219,18 +226,15 @@ class PINCH(GESTURE):
 # table based on their name.
 handlers = {h.name: h for h in (SWIPE(), PINCH())}
 
-def get_conf_line(line):
-    'Process a single line in conf file'
-    fields = line.split(maxsplit=3)
+def get_gesture_line(lineargs):
+    'Process a single gesture line in conf file'
+    fields = lineargs.split(maxsplit=2)
 
     # Look for configured gesture. Sanity check the line.
-    if len(fields) < 4:
+    if len(fields) < 3:
         return 'Invalid gesture line'
 
-    key, gesture, motion, command = fields
-
-    if key != 'gesture:':
-        return 'Configuration command "{}" is not supported'.format(key)
+    gesture, motion, command = fields
 
     handler = handlers.get(gesture.upper())
     if not handler:
@@ -248,6 +252,28 @@ def get_conf_line(line):
 
     # Add the configured gesture
     return handler.add(motion.lower(), fingers, command)
+
+def get_device_line(lineargs):
+    'Process a single device line in conf file'
+    if not args.device:
+        args.device = lineargs.strip()
+
+def get_conf_line(line):
+    'Process a single line in conf file'
+
+    fields = line.split(maxsplit=1)
+    if len(fields) < 2:
+        return 'Invalid configuration line'
+
+    key, lineargs = fields
+    key = key.rstrip(':')
+
+    if key == 'gesture':
+        return get_gesture_line(lineargs)
+    elif key == 'device':
+        return get_device_line(lineargs)
+
+    return 'Configuration command "{}" is not supported'.format(key)
 
 def get_conf(conffile):
     '''
@@ -275,34 +301,42 @@ proglock = open_lock(PROG, user)
 if not proglock:
     sys.exit('{} is already running for {}, terminating ..'.format(PROG, user))
 
-# Get touchpad device
-device = get_device()
-
 # Read gestures from conf file. Use file given as command line argument,
 # else look in user dir then system dir.
-if not args.raw:
-    if args.conffile:
-        conf = Path(args.conffile)
-        if not get_conf(conf):
-            sys.exit('Conf file "{}" does not exist.'.format(args.conffile))
+if args.conffile:
+    conf = Path(args.conffile)
+    if not get_conf(conf):
+        sys.exit('Conf file "{}" does not exist.'.format(args.conffile))
+else:
+    for confdir in CONFDIRS:
+        conf = Path(confdir, CONFNAME)
+        if get_conf(conf):
+            break
     else:
-        for confdir in CONFDIRS:
-            conf = Path(confdir, CONFNAME)
-            if get_conf(conf):
-                break
-        else:
-            sys.exit('No file {} in {}.'.format(CONFNAME,
-                ' or '.join(CONFDIRS)))
+        sys.exit('No file {} in {}.'.format(CONFNAME,
+            ' or '.join(CONFDIRS)))
 
-    if args.verbose:
-        print('{}: using {}, session {}'.format(PROG, conf,
-            os.getenv('XDG_SESSION_TYPE', 'unknown')))
-        print('{}: monitoring device {} for {} gestures'.format(PROG, device,
+# Get touchpad device
+device = get_device(args.device) if args.device != "all" else None
+
+if args.verbose:
+    print('{}: using {}, session {}'.format(PROG, conf,
+        os.getenv('XDG_SESSION_TYPE', 'unknown')))
+
+    if not args.raw:
+        if device:
+            print('{}: device {}: {}'.format(PROG, device[0],
+                device[1]))
+        else:
+            print('{}: monitoring all devices'.format(PROG))
+
+        print('{}: configured with {} gestures'.format(PROG,
             sum([len(h.motions) for h in handlers.values()])))
 
 # Note your must "sudo gpasswd -a $USER input" then log out/in for
 # permission to access the device.
-command = 'stdbuf -oL -- libinput-debug-events --device {}'.format(device)
+devstr = ' --device {}'.format(device[0]) if device else ''
+command = 'stdbuf -oL -- libinput-debug-events{}'.format(devstr)
 
 cmd = subprocess.Popen(shlex.split(command), stdout=subprocess.PIPE,
         bufsize=0, universal_newlines=True)
