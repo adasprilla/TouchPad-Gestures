@@ -49,7 +49,8 @@ def run(*args, check=True, **kwargs):
     result.stderr = None
     result.returncode = 0
     try:
-        result.stdout = subprocess.check_output(stderr=(None if check else subprocess.DEVNULL),
+        result.stdout = subprocess.check_output(
+                stderr=(None if check else subprocess.DEVNULL),
                 universal_newlines=True, *args, **kwargs)
     except Exception as e:
         result.stderr = str(e)
