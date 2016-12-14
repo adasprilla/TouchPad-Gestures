@@ -37,7 +37,8 @@ NOTE: Arch users can just install [_libinput-gestures from the
 AUR_](https://aur.archlinux.org/packages/libinput-gestures/). Then skip
 to the next CONFIGURATION section.
 
-You need libinput release 1.0 or later. Install prerequisites:
+You need python3, python2 is not supported. You also need libinput
+release 1.0 or later. Install prerequisites:
 
     # E.g. On Arch:
     sudo pacman -S xdotool wmctrl
