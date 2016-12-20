@@ -31,7 +31,10 @@ http://github.com/bulletmark/libinput-gestures.
 IMPORTANT: You must be a member of the _input_ group to have permission
 to read the touchpad device:
 
-    sudo gpasswd -a $USER input  # Log out and back in to assign this group
+    sudo gpasswd -a $USER input
+
+After executing the above command, **log out of your session completely**, and then
+log back in to assign this group.
 
 NOTE: Arch users can just install [_libinput-gestures from the
 AUR_](https://aur.archlinux.org/packages/libinput-gestures/). Then skip
