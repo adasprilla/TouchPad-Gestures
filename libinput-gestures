@@ -141,9 +141,10 @@ def get_device(name):
             elif key == 'Capabilities' and value == 'pointer' and has_size \
                     and not name:
                 return dev, devname
-        else:
-            print('Can not see any devices, did you add yourself to the '
-                    'input group?', file=sys.stderr)
+
+    if not devname:
+        print('Can not see any devices, did you add yourself to the '
+                'input group?', file=sys.stderr)
 
     sys.exit('Could not determine touchpad device.')
 
