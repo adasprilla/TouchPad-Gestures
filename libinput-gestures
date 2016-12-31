@@ -321,7 +321,8 @@ else:
             ' or '.join(CONFDIRS)))
 
 # Get touchpad device
-device = get_device(args.device) if args.device != "all" else None
+device = get_device(args.device) \
+        if not args.device or args.device.lower() != "all" else None
 
 if args.verbose:
     print('{}: using {}, session {}'.format(PROG, conf,
