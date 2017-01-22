@@ -48,6 +48,7 @@ launch() {
     if echo $XDG_CURRENT_DESKTOP | grep -q KDE; then
 	if hash kioclient5 &>/dev/null; then
 	    kioclient5 exec "$APPDIR/$app.desktop" >/dev/null
+	    return $?
 	elif hash kioclient &>/dev/null; then
 	    kioclient exec "$APPDIR/$app.desktop" >/dev/null
 	    return $?
