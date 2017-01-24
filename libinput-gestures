@@ -118,6 +118,8 @@ def get_device(name):
     if res.returncode == 0:
         devname = None
         dev = None
+        devname_text = None
+        dev_text = None
         has_size = False
         for line in res.stdout.splitlines():
             line = line.strip()
@@ -131,16 +133,26 @@ def get_device(name):
             # Look for touchpad
             if key == 'Device':
                 devname = value
+                if not dev_text and re.search(r'touch ?pad', devname, re.I):
+                    devname_text = devname
             elif key == 'Kernel':
                 dev = value
                 if devname and devname == name:
                     return dev, devname
+                if not dev_text and devname_text:
+                    dev_text = dev
                 has_size = False
             elif key == 'Size' and dev:
                 has_size = True
             elif key == 'Capabilities' and value == 'pointer' and has_size \
                     and not name:
                 return dev, devname
+
+    # If we did not find a touchpad using the regular search but at
+    # least found a device with the string "touchpad" in it's device
+    # name then return that.
+    if dev_text:
+        return dev_text, devname_text
 
     if not devname:
         print('Can not see any devices, did you add yourself to the '
