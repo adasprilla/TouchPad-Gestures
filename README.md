@@ -147,7 +147,7 @@ You can check the status of the app with:
 
     # cd to source dir, as above
     git pull
-    sudo ./libinput-gestures-setup uninstall
+    sudo ./libinput-gestures-setup install
     libinput-gestures-setup restart
 
 ### REMOVAL
