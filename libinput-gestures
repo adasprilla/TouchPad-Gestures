@@ -148,15 +148,15 @@ def get_device(name):
                     and not name:
                 return dev, devname
 
-    # If we did not find a touchpad using the regular search but at
-    # least found a device with the string "touchpad" in it's device
-    # name then return that.
-    if dev_text:
-        return dev_text, devname_text
+        # If we did not find a touchpad using the regular search but at
+        # least found a device with the string "touchpad" in it's device
+        # name then return that.
+        if dev_text:
+            return dev_text, devname_text
 
-    if not devname:
-        print('Can not see any devices, did you add yourself to the '
-                'input group?', file=sys.stderr)
+        if not devname:
+            print('Can not see any devices, did you add yourself to the '
+                    'input group?', file=sys.stderr)
 
     sys.exit('Could not determine touchpad device.')
 
