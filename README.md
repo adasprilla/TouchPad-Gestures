@@ -20,7 +20,7 @@ format.
 This utility is developed and tested on Arch linux using the GNOME 3 DE
 on Xorg and Wayland. It works somewhat incompletely on Wayland (via
 XWayland). See the WAYLAND section below and the comments in the default
-`libinput-gestures.conf` file. It should work with KDE etc but I am not
+`libinput-gestures.conf` file. It has been [reported to work with KDE](http://www.lorenzobettini.it/2017/02/touchpad-gestures-in-linux-kde-with-libinput-gestures/). I am not
 sure how well this will work on all distros and DE's etc.
 
 The latest version and documentation is available at
