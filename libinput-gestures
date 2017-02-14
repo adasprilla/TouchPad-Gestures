@@ -242,7 +242,14 @@ class PINCH(GESTURE):
 # table based on their name.
 handlers = {h.name: h for h in (SWIPE(), PINCH())}
 
-def get_gesture_line(lineargs):
+# Table of configuration commands
+conf_commands = {}
+def add_conf_command(func):
+    'Add configuration command to command lookup table based on name'
+    conf_commands[re.sub('^conf_', '', func.__name__)] = func
+
+@add_conf_command
+def conf_gesture(lineargs):
     'Process a single gesture line in conf file'
     fields = lineargs.split(maxsplit=2)
 
@@ -269,10 +276,12 @@ def get_gesture_line(lineargs):
     # Add the configured gesture
     return handler.add(motion.lower(), fingers, command)
 
-def get_device_line(lineargs):
+@add_conf_command
+def conf_device(lineargs):
     'Process a single device line in conf file'
     if not args.device:
         args.device = lineargs.strip()
+    return None
 
 def get_conf_line(line):
     'Process a single line in conf file'
@@ -283,13 +292,12 @@ def get_conf_line(line):
 
     key, lineargs = fields
     key = key.rstrip(':')
+    conf_func = conf_commands.get(key)
 
-    if key == 'gesture':
-        return get_gesture_line(lineargs)
-    elif key == 'device':
-        return get_device_line(lineargs)
+    if not conf_func:
+        return 'Configuration command "{}" is not supported'.format(key)
 
-    return 'Configuration command "{}" is not supported'.format(key)
+    return conf_func(lineargs)
 
 def get_conf(conffile):
     '''
