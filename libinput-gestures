@@ -44,7 +44,8 @@ def open_lock(*args):
 def run(*args, check=True, **kwargs):
     'Run subprocess function and return result'
     # Maintain compatability with python 3.4.
-    class result: pass
+    class result:
+        pass
     result.stdout = None
     result.stderr = None
     result.returncode = 0
@@ -160,6 +161,11 @@ def get_device(name):
 
     sys.exit('Could not determine touchpad device.')
 
+handlers = {}
+def add_handler(cls):
+    'Create gesture handler instance and add to lookup table based on name'
+    handlers[cls.__name__] = cls()
+
 class GESTURE:
     'Abstract base class for handling for gestures'
     def __init__(self):
@@ -195,6 +201,7 @@ class GESTURE:
             else:
                 run(command)
 
+@add_handler
 class SWIPE(GESTURE):
     'Class to handle this type of gesture'
     SUPPORTED_MOTIONS = ('left', 'right', 'up', 'down')
@@ -220,6 +227,7 @@ class SWIPE(GESTURE):
 
             self.action(motion)
 
+@add_handler
 class PINCH(GESTURE):
     'Class to handle this type of gesture'
     SUPPORTED_MOTIONS = ('in', 'out')
@@ -238,50 +246,42 @@ class PINCH(GESTURE):
         if self.data != 0.0:
             self.action('in' if self.data >= 0.0 else 'out')
 
-# Create gesture handler instances and insert them in handler lookup
-# table based on their name.
-handlers = {h.name: h for h in (SWIPE(), PINCH())}
+class CONFIG:
+    'Pseudo class for definition of all configuration commands'
+    def gesture(lineargs):
+        'Process a single gesture line in conf file'
+        fields = lineargs.split(maxsplit=2)
 
-# Table of configuration commands
-conf_commands = {}
-def add_conf_command(func):
-    'Add configuration command to command lookup table based on name'
-    conf_commands[re.sub('^conf_', '', func.__name__)] = func
+        # Look for configured gesture. Sanity check the line.
+        if len(fields) < 3:
+            return 'Invalid gesture line'
 
-@add_conf_command
-def conf_gesture(lineargs):
-    'Process a single gesture line in conf file'
-    fields = lineargs.split(maxsplit=2)
+        gesture, motion, command = fields
 
-    # Look for configured gesture. Sanity check the line.
-    if len(fields) < 3:
-        return 'Invalid gesture line'
+        handler = handlers.get(gesture.upper())
+        if not handler:
+            return 'Gesture "{}" is not supported'.format(gesture)
 
-    gesture, motion, command = fields
+        # Gesture command can be configured with optional specific finger
+        # count so look for that
+        fingers = None
+        fcommand = command.split(maxsplit=1)
+        if len(fcommand) > 1:
+            fcount, ncommand = fcommand
+            if fcount.isdigit() and len(fcount) == 1:
+                command = ncommand
+                fingers = fcount
 
-    handler = handlers.get(gesture.upper())
-    if not handler:
-        return 'Gesture "{}" is not supported'.format(gesture)
+        # Add the configured gesture
+        return handler.add(motion.lower(), fingers, command)
 
-    # Gesture command can be configured with optional specific finger
-    # count so look for that
-    fingers = None
-    fcommand = command.split(maxsplit=1)
-    if len(fcommand) > 1:
-        fcount, ncommand = fcommand
-        if fcount.isdigit() and len(fcount) == 1:
-            command = ncommand
-            fingers = fcount
+    def device(lineargs):
+        'Process a single device line in conf file'
+        # Command line overrides configuration file
+        if not args.device:
+            args.device = lineargs.strip()
 
-    # Add the configured gesture
-    return handler.add(motion.lower(), fingers, command)
-
-@add_conf_command
-def conf_device(lineargs):
-    'Process a single device line in conf file'
-    if not args.device:
-        args.device = lineargs.strip()
-    return None
+        return None if args.device else 'No device specified'
 
 def get_conf_line(line):
     'Process a single line in conf file'
@@ -292,7 +292,7 @@ def get_conf_line(line):
 
     key, lineargs = fields
     key = key.rstrip(':')
-    conf_func = conf_commands.get(key)
+    conf_func = None if key.startswith('__') else getattr(CONFIG, key)
 
     if not conf_func:
         return 'Configuration command "{}" is not supported'.format(key)
