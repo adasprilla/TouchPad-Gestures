@@ -12,7 +12,8 @@ ICODIR="$ICOBAS/128x128/apps"
 OCODIR="/usr/share/pixmaps"
 DOCDIR="/usr/share/doc/$NAME"
 CNFDIR="/etc"
-AUTDIR="${XDG_CONFIG_HOME:-$HOME/.config}/autostart"
+HCFDIR="${XDG_CONFIG_HOME:-$HOME/.config}"
+AUTDIR="$HCFDIR/autostart"
 
 usage() {
     echo "Usage:"
@@ -123,6 +124,11 @@ user_action() {
 	    echo "$NAME is running."
 	else
 	    echo "$NAME is not running."
+	fi
+	if [ -f $HCFDIR/$NAME.conf ]; then
+	    echo "$NAME is using custom configuration."
+	else
+	    echo "$NAME is using default configuration."
 	fi
     else
 	usage
