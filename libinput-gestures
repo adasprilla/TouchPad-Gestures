@@ -41,25 +41,20 @@ def open_lock(*args):
 
     return fp
 
-def run(*args, check=True, **kwargs):
-    'Run subprocess function and return result'
-    # Maintain compatability with python 3.4.
-    class result:
-        pass
-    result.stdout = None
-    result.stderr = None
-    result.returncode = 0
+def run(*args, check=True):
+    'Run subprocess function and return standard output or None'
+    # Maintain subprocess compatability with python 3.4 so use
+    # check_output() rather than run().
     try:
-        result.stdout = subprocess.check_output(
+        stdout = subprocess.check_output(
                 stderr=(None if check else subprocess.DEVNULL),
-                universal_newlines=True, *args, **kwargs)
+                universal_newlines=True, *args)
     except Exception as e:
-        result.stderr = str(e)
-        result.returncode = 1
+        stdout = None
         if check:
-            print(result.stderr, file=sys.stderr)
+            print(str(e), file=sys.stderr)
 
-    return result
+    return stdout
 
 def internal(args):
     'Internal command handler.'
@@ -81,15 +76,15 @@ def internal(args):
     argsi = opti.parse_args(args)
 
     # Get list of current workspaces
-    res = run(['wmctrl', '-d'], check=False)
-    if res.returncode != 0:
+    stdout = run(('wmctrl', '-d'), check=False)
+    if not stdout:
         # This command can fail on GNOME when you have only a single
         # dynamic workspace using Xorg (probably a GNOME bug) so let's
         # just ignore it given there is no other workspace to switch to
         # anyhow.
         return
 
-    out = res.stdout.strip().splitlines()
+    out = stdout.strip().splitlines()
     lines = [l.split(maxsplit=3)[1] for l in out]
     index = lines.index('*')
 
@@ -111,18 +106,18 @@ def internal(args):
             index = minindex
 
     if index >= minindex and index < maxindex:
-        run(['wmctrl', '-s', str(index)])
+        run(('wmctrl', '-s', str(index)))
 
 def get_device(name):
     'Determine libinput touchpad device (path, name)'
-    res = run('libinput-list-devices')
-    if res.returncode == 0:
+    stdout = run('libinput-list-devices')
+    if stdout:
         devname = None
         dev = None
         devname_text = None
         dev_text = None
         has_size = False
-        for line in res.stdout.splitlines():
+        for line in stdout.splitlines():
             line = line.strip()
             if not line or ':' not in line:
                 continue
@@ -161,8 +156,10 @@ def get_device(name):
 
     sys.exit('Could not determine touchpad device.')
 
+# Table of gesture handlers
 handlers = {}
-def add_handler(cls):
+
+def add_gesture_handler(cls):
     'Create gesture handler instance and add to lookup table based on name'
     handlers[cls.__name__] = cls()
 
@@ -201,7 +198,7 @@ class GESTURE:
             else:
                 run(command)
 
-@add_handler
+@add_gesture_handler
 class SWIPE(GESTURE):
     'Class to handle this type of gesture'
     SUPPORTED_MOTIONS = ('left', 'right', 'up', 'down')
@@ -227,7 +224,7 @@ class SWIPE(GESTURE):
 
             self.action(motion)
 
-@add_handler
+@add_gesture_handler
 class PINCH(GESTURE):
     'Class to handle this type of gesture'
     SUPPORTED_MOTIONS = ('in', 'out')
@@ -246,42 +243,49 @@ class PINCH(GESTURE):
         if self.data != 0.0:
             self.action('in' if self.data >= 0.0 else 'out')
 
-class CONFIG:
-    'Pseudo class for definition of all configuration commands'
-    def gesture(lineargs):
-        'Process a single gesture line in conf file'
-        fields = lineargs.split(maxsplit=2)
+# Table of configuration commands
+conf_commands = {}
 
-        # Look for configured gesture. Sanity check the line.
-        if len(fields) < 3:
-            return 'Invalid gesture line'
+def add_conf_command(func):
+    'Add configuration command to command lookup table based on name'
+    conf_commands[re.sub('^conf_', '', func.__name__)] = func
 
-        gesture, motion, command = fields
+@add_conf_command
+def conf_gesture(lineargs):
+    'Process a single gesture line in conf file'
+    fields = lineargs.split(maxsplit=2)
 
-        handler = handlers.get(gesture.upper())
-        if not handler:
-            return 'Gesture "{}" is not supported'.format(gesture)
+    # Look for configured gesture. Sanity check the line.
+    if len(fields) < 3:
+        return 'Invalid gesture line'
 
-        # Gesture command can be configured with optional specific finger
-        # count so look for that
-        fingers = None
-        fcommand = command.split(maxsplit=1)
-        if len(fcommand) > 1:
-            fcount, ncommand = fcommand
-            if fcount.isdigit() and len(fcount) == 1:
-                command = ncommand
-                fingers = fcount
+    gesture, motion, command = fields
 
-        # Add the configured gesture
-        return handler.add(motion.lower(), fingers, command)
+    handler = handlers.get(gesture.upper())
+    if not handler:
+        return 'Gesture "{}" is not supported'.format(gesture)
 
-    def device(lineargs):
-        'Process a single device line in conf file'
-        # Command line overrides configuration file
-        if not args.device:
-            args.device = lineargs.strip()
+    # Gesture command can be configured with optional specific finger
+    # count so look for that
+    fingers = None
+    fcommand = command.split(maxsplit=1)
+    if len(fcommand) > 1:
+        fcount, ncommand = fcommand
+        if fcount.isdigit() and len(fcount) == 1:
+            command = ncommand
+            fingers = fcount
 
-        return None if args.device else 'No device specified'
+    # Add the configured gesture
+    return handler.add(motion.lower(), fingers, command)
+
+@add_conf_command
+def conf_device(lineargs):
+    'Process a single device line in conf file'
+    # Command line overrides configuration file
+    if not args.device:
+        args.device = lineargs
+
+    return None if args.device else 'No device specified'
 
 def get_conf_line(line):
     'Process a single line in conf file'
@@ -292,7 +296,7 @@ def get_conf_line(line):
 
     key, lineargs = fields
     key = key.rstrip(':')
-    conf_func = None if key.startswith('__') else getattr(CONFIG, key)
+    conf_func = conf_commands.get(key)
 
     if not conf_func:
         return 'Configuration command "{}" is not supported'.format(key)
