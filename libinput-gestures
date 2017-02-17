@@ -41,14 +41,13 @@ def open_lock(*args):
 
     return fp
 
-def run(*args, check=True):
+def run(cmd, check=True):
     'Run subprocess function and return standard output or None'
     # Maintain subprocess compatability with python 3.4 so use
     # check_output() rather than run().
     try:
-        stdout = subprocess.check_output(
-                stderr=(None if check else subprocess.DEVNULL),
-                universal_newlines=True, *args)
+        stdout = subprocess.check_output(cmd, universal_newlines=True,
+                stderr=(None if check else subprocess.DEVNULL))
     except Exception as e:
         stdout = None
         if check:
