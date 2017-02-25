@@ -55,58 +55,6 @@ def run(cmd, check=True):
 
     return stdout
 
-def internal(args):
-    'Internal command handler.'
-    # Commands currently supported are:
-    commands = (
-        'ws_up',
-        'ws_down',
-    )
-    # Set up command line arguments
-    opti = argparse.ArgumentParser(description=internal.__doc__)
-    opti.add_argument('-w', '--wrap', action='store_true',
-            help='Wrap workspaces when switching to/from start/end')
-    opti.add_argument('--row', type=int,
-            help='Step along the row for this number in a row')
-    opti.add_argument('--col', type=int,
-            help='Step along the column for this number in a column')
-    opti.add_argument('action', choices=commands,
-            help='Internal command to action')
-    argsi = opti.parse_args(args)
-
-    # Get list of current workspaces
-    stdout = run(('wmctrl', '-d'), check=False)
-    if not stdout:
-        # This command can fail on GNOME when you have only a single
-        # dynamic workspace using Xorg (probably a GNOME bug) so let's
-        # just ignore it given there is no other workspace to switch to
-        # anyhow.
-        return
-
-    out = stdout.strip().splitlines()
-    lines = [l.split(maxsplit=3)[1] for l in out]
-    index = lines.index('*')
-
-    if argsi.row:
-        minindex = index - (index % argsi.row)
-        maxindex = minindex + argsi.row
-        count = 1
-    else:
-        minindex = 0
-        maxindex = len(lines)
-        count = (maxindex // argsi.col) if argsi.col else 1
-
-    # Switch to desired workspace
-    index += count if argsi.action == 'ws_up' else -count
-    if argsi.wrap:
-        if index == minindex - count:
-            index = maxindex - count
-        elif index >= maxindex:
-            index = minindex
-
-    if index >= minindex and index < maxindex:
-        run(('wmctrl', '-s', str(index)))
-
 def get_device(name):
     'Determine libinput touchpad device (path, name)'
     stdout = run('libinput-list-devices')
@@ -155,6 +103,86 @@ def get_device(name):
 
     sys.exit('Could not determine touchpad device.')
 
+class COMMAND:
+    'Generic command handler'
+    def __init__(self, args):
+        self.argslist = args
+
+    def run(self):
+        'Run this command + arguments'
+        run(self.argslist)
+
+    def __str__(self):
+        'Create string representation'
+        return ' '.join(self.argslist)
+
+# Table of internal commands
+internal_commands = {}
+
+def add_internal_command(cls):
+    'Add configuration command to command lookup table based on name'
+    internal_commands[re.sub('^COMMAND', '', cls.__name__)] = cls
+
+@add_internal_command
+class COMMAND_internal(COMMAND):
+    'Internal command handler.'
+    def __init__(self, args):
+        'Actional internal swipe commands'
+        super().__init__(args)
+
+        # Commands currently supported are:
+        commands = (
+            'ws_up',
+            'ws_down',
+        )
+        # Set up command line arguments
+        opt = argparse.ArgumentParser(prog=args[0], description=self.__doc__)
+        opt.add_argument('-w', '--wrap', action='store_true',
+                help='Wrap workspaces when switching to/from start/end')
+        opt.add_argument('--row', type=int,
+                help='Step along the row for this number in a row')
+        opt.add_argument('--col', type=int,
+                help='Step along the column for this number in a column')
+        opt.add_argument('action', choices=commands,
+                help='Internal command to action')
+        self.args = opt.parse_args(args[1:])
+        self.is_up = self.args.action == commands[0]
+
+    def run(self):
+        'Get list of current workspaces and select next one'
+        stdout = run(('wmctrl', '-d'), check=False)
+        if not stdout:
+            # This command can fail on GNOME when you have only a single
+            # dynamic workspace using Xorg (probably a GNOME bug) so let's
+            # just ignore it given there is no other workspace to switch to
+            # anyhow.
+            return
+
+        out = stdout.strip().splitlines()
+        lines = [l.split(maxsplit=3)[1] for l in out]
+        index = lines.index('*')
+
+        if self.args.row:
+            minindex = index - (index % self.args.row)
+            maxindex = minindex + self.args.row
+            count = 1
+        else:
+            minindex = 0
+            maxindex = len(lines)
+            count = (maxindex // self.args.col) if self.args.col else 1
+
+        # Work out desired workspace
+        index += count if self.is_up else -count
+        if self.args.wrap:
+            if index == minindex - count:
+                index = maxindex - count
+            elif index >= maxindex:
+                index = minindex
+
+        # Switch to desired workspace
+        if index >= minindex and index < maxindex:
+            run(('wmctrl', '-s', str(index)))
+
 # Table of gesture handlers
 handlers = {}
 
@@ -176,7 +204,9 @@ class GESTURE:
                     self.name)
 
         key = (motion, fingers) if fingers else motion
-        self.motions[key] = shlex.split(command)
+        cmds = shlex.split(command)
+        cls = internal_commands.get(cmds[0], COMMAND)
+        self.motions[key] = cls(cmds)
         return None
 
     def action(self, motion):
@@ -189,13 +219,10 @@ class GESTURE:
             print('{}: {} {} {} {}'.format(PROG, self.name, motion,
                 self.fingers, self.data))
             if command:
-                print('  ', ' '.join(command))
+                print('  ', command)
 
         if command and not args.debug:
-            if command[0] == '_internal':
-                internal(command[1:])
-            else:
-                run(command)
+            command.run()
 
 @add_gesture_handler
 class SWIPE(GESTURE):
