@@ -1,15 +1,14 @@
 ### LIBINPUT-GESTURES
 
-[Libinput-gestures](https://github.com/bulletmark/libinput-gestures) is
-a utility which reads libinput gestures from your touchpad and maps them
-to gestures you configure in a configuration file. Each gesture can be
-configured to activate a shell command which is typically an
-[_xdotool_](http://www.semicomplete.com/projects/xdotool/) command to
-action desktop/window/application keyboard combinations and commands.
-See the examples in the provided `libinput-gestures.conf` file. My
-motivation for creating this is to use triple swipe up/down to switch
-workspaces, and triple swipe right/left to go backwards/forwards in my
-browser, as per the default configuration.
+[Libinput-gestures][REPO] is a utility which reads libinput gestures
+from your touchpad and maps them to gestures you configure in a
+configuration file. Each gesture can be configured to activate a shell
+command which is typically an [_xdotool_][XDOTOOL] command to action
+desktop/window/application keyboard combinations and commands. See the
+examples in the provided `libinput-gestures.conf` file. My motivation
+for creating this is to use triple swipe up/down to switch workspaces,
+and triple swipe right/left to go backwards/forwards in my browser, as
+per the default configuration.
 
 This small and simple utility is only intended to be used temporarily
 until GNOME and other DE's action libinput gestures natively. It parses
@@ -20,8 +19,9 @@ format.
 This utility is developed and tested on Arch linux using the GNOME 3 DE
 on Xorg and Wayland. It works somewhat incompletely on Wayland (via
 XWayland). See the WAYLAND section below and the comments in the default
-`libinput-gestures.conf` file. It has been [reported to work with KDE](http://www.lorenzobettini.it/2017/02/touchpad-gestures-in-linux-kde-with-libinput-gestures/). I am not
-sure how well this will work on all distros and DE's etc.
+`libinput-gestures.conf` file. It has been [reported to work with
+KDE](http://www.lorenzobettini.it/2017/02/touchpad-gestures-in-linux-kde-with-libinput-gestures/).
+I am not sure how well this will work on all distros and DE's etc.
 
 The latest version and documentation is available at
 http://github.com/bulletmark/libinput-gestures.
@@ -37,8 +37,7 @@ After executing the above command, **log out of your session completely**, and t
 log back in to assign this group.
 
 NOTE: Arch users can just install [_libinput-gestures from the
-AUR_](https://aur.archlinux.org/packages/libinput-gestures/). Then skip
-to the next CONFIGURATION section.
+AUR_][AUR]. Then skip to the next CONFIGURATION section.
 
 You need python3, python2 is not supported. You also need libinput
 release 1.0 or later. Install prerequisites:
@@ -106,13 +105,11 @@ gestures, missing packages, etc:
     libinput-gestures -d
     (<ctrl-c> to stop)
 
-    # And/or test to print out commands as they are executed:
-    libinput-gestures -v
-    (<ctrl-c> to stop)
-
 Confirm that the correct commands are reported for your 3 finger
 swipe up/down/left/right gestures, and your 2 or 3 finger pinch
 in/out gestures. Some touchpads can also support 4 finger gestures.
+
+If you have problems then follow the TROUBLESHOOTING steps below.
 
 ### STARTING AND STOPPING
 
@@ -177,6 +174,38 @@ so, for example, page forward/back swipe gestures do work for Firefox
 and Chrome browsers when running on Wayland as per the default
 configuration.
 
+### TROUBLESHOOTING
+
+Please don't raise a github issue but provide litte information about
+your problem.
+
+1. Ensure you are running the latest version from the
+   [libinput-gestures github repository][REPO] or from the [Arch AUR][AUR].
+
+2. Ensure you have followed the installation instructions here carefully.
+   Perhaps temporarily remove your custom configuration to try with the
+   default configuration.
+
+3. Run in `libinput-gestures` on the command line in debug mode while
+   performing some 3 and 4 finger left/right/up/down swipes, and some
+   pinch gestures. Configured commands are not executed, they are merely
+   output to the screen:
+    ````
+	libinput-gestures-setup stop
+	libinput-gestures -d
+	(<ctrl-c> to stop)
+    ````
+4. Run in `libinput-gestures` in raw mode by repeating the same commands
+   as above step but use the `-r` (--raw) switch instead of `-d` (--debug).
+   This mode does nothing but print out the raw gesture events seen from
+   `libinput-debug-events`.
+
+5. Search the web for Linux kernel and/or libinput issues relating to
+   your specific touchpad device and/or laptop/pc.
+
+6. If you raise an issue, please paste the screen output from steps 3
+   and 4 above.
+
 ### LICENSE
 
 Copyright (C) 2015 Mark Blakeney. This program is distributed under the
@@ -189,5 +218,9 @@ This program is distributed in the hope that it will be useful, but
 WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
 Public License at <http://www.gnu.org/licenses/> for more details.
+
+[REPO]: https://github.com/bulletmark/libinput-gestures/
+[AUR]: https://aur.archlinux.org/packages/libinput-gestures/
+[XDOTOOL]: http://www.semicomplete.com/projects/xdotool/
 
 <!-- vim: se ai syn=markdown: -->
