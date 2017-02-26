@@ -186,22 +186,23 @@ your problem.
    Perhaps temporarily remove your custom configuration to try with the
    default configuration.
 
-3. Run in `libinput-gestures` on the command line in debug mode while
+3. Run `libinput-gestures` on the command line in debug mode while
    performing some 3 and 4 finger left/right/up/down swipes, and some
-   pinch gestures. Configured commands are not executed, they are merely
-   output to the screen:
+   pinch gestures. In debug mode, configured commands are not executed,
+   they are merely output to the screen:
     ````
 	libinput-gestures-setup stop
 	libinput-gestures -d
 	(<ctrl-c> to stop)
     ````
-4. Run in `libinput-gestures` in raw mode by repeating the same commands
-   as above step but use the `-r` (--raw) switch instead of `-d` (--debug).
-   This mode does nothing but print out the raw gesture events seen from
-   `libinput-debug-events`.
+4. Run `libinput-gestures` in raw mode by repeating the same commands as
+   above step but use the `-r` (--raw) switch instead of `-d` (--debug).
+   Raw mode does nothing more than echo the raw gesture events
+   received from `libinput-debug-events`.
 
 5. Search the web for Linux kernel and/or libinput issues relating to
-   your specific touchpad device and/or laptop/pc.
+   your specific touchpad device and/or laptop/pc. Update your BIOS if
+   possible.
 
 6. If you raise an issue, please paste the screen output from steps 3
    and 4 above.
