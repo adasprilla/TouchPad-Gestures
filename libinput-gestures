@@ -63,7 +63,7 @@ def internal(args):
         'ws_down',
     )
     # Set up command line arguments
-    opti = argparse.ArgumentParser(description=__doc__)
+    opti = argparse.ArgumentParser(description=internal.__doc__)
     opti.add_argument('-w', '--wrap', action='store_true',
             help='Wrap workspaces when switching to/from start/end')
     opti.add_argument('--row', type=int,
