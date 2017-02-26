@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 'Read gestures from libinput touchpad and action shell commands.'
 # Mark Blakeney, Sep 2015
-import os, sys, argparse, subprocess, shlex, re, getpass, fcntl
+import os, sys, argparse, subprocess, shlex, re, getpass, fcntl, platform
 from pathlib import Path
 
 PROG = Path(sys.argv[0]).name
@@ -348,18 +348,20 @@ device = get_device(args.device) \
         if not args.device or args.device.lower() != "all" else None
 
 if args.verbose:
-    print('{}: using {}, session {}'.format(PROG, conf,
-        os.getenv('XDG_SESSION_TYPE', 'unknown')))
+    if device:
+        print('{}: device {}: {}'.format(PROG, device[0],
+            device[1]))
+    else:
+        print('{}: monitoring all devices'.format(PROG))
 
-    if not args.raw:
-        if device:
-            print('{}: device {}: {}'.format(PROG, device[0],
-                device[1]))
-        else:
-            print('{}: monitoring all devices'.format(PROG))
+    xsession = os.getenv('XDG_SESSION_DESKTOP',
+            os.getenv('DESKTOP_SESSION', 'unknown'))
+    xtype = os.getenv('XDG_SESSION_TYPE', 'unknown')
+    print('{}: session {}/{} on {}'.format(PROG, xsession, xtype,
+        platform.platform()))
 
-        print('{}: configured with {} gestures'.format(PROG,
-            sum([len(h.motions) for h in handlers.values()])))
+    print('{}: using {} with {} gestures'.format(PROG,
+        conf, sum([len(h.motions) for h in handlers.values()])))
 
 # Note your must "sudo gpasswd -a $USER input" then log out/in for
 # permission to access the device.
