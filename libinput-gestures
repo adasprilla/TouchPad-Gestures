@@ -357,8 +357,8 @@ if args.verbose:
     xsession = os.getenv('XDG_SESSION_DESKTOP',
             os.getenv('DESKTOP_SESSION', 'unknown'))
     xtype = os.getenv('XDG_SESSION_TYPE', 'unknown')
-    print('{}: session {}/{} on {}'.format(PROG, xsession, xtype,
-        platform.platform()))
+    print('{}: session {}+{} on {} and python {}'.format(PROG, xsession, xtype,
+        platform.platform(), platform.python_version()))
 
     print('{}: using {} with {} gestures'.format(PROG,
         conf, sum([len(h.motions) for h in handlers.values()])))
