@@ -188,7 +188,7 @@ your problem.
 
 3. Run `libinput-gestures` on the command line in debug mode while
    performing some 3 and 4 finger left/right/up/down swipes, and some
-   pinch gestures. In debug mode, configured commands are not executed,
+   pinch in/outs. In debug mode, configured commands are not executed,
    they are merely output to the screen:
     ````
 	libinput-gestures-setup stop
@@ -197,8 +197,11 @@ your problem.
     ````
 4. Run `libinput-gestures` in raw mode by repeating the same commands as
    above step but use the `-r` (--raw) switch instead of `-d` (--debug).
-   Raw mode does nothing more than echo the raw gesture events
-   received from `libinput-debug-events`.
+   Raw mode does nothing more than echo the raw gesture events received
+   from `libinput-debug-events`. If you see POINTER_* events but no
+   GESTURE_* events then unfortunately your touchpad and/or libinput
+   combination can report simple finger movements but does not report
+   multi-finger gestures so `libinput-gestures` will not work.
 
 5. Search the web for Linux kernel and/or libinput issues relating to
    your specific touchpad device and/or laptop/pc. Update your BIOS if
