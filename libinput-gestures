@@ -330,13 +330,7 @@ def get_conf_line(line):
     return conf_func(lineargs)
 
 def get_conf(conffile):
-    '''
-    Read configuration file, given path. Returns True if file exists and
-    was read.
-    '''
-    if not conffile.exists():
-        return False
-
+    'Read given configuration file and store internal actions etc'
     with conffile.open() as fp:
         for line in fp:
             line = line.strip()
@@ -347,7 +341,6 @@ def get_conf(conffile):
             if errmsg:
                 sys.exit('Error in file {} at line:\n{}.\n{}.'.format(
                     conffile, line, errmsg))
-    return True
 
 # Make sure only one instance running for current user
 user = getpass.getuser()
@@ -355,20 +348,23 @@ proglock = open_lock(PROG, user)
 if not proglock:
     sys.exit('{} is already running for {}, terminating ..'.format(PROG, user))
 
-# Read gestures from conf file. Use file given as command line argument,
-# else look in user dir then system dir.
+# Search for configuration file. Use file given as command line
+# argument, else look for file in search dir order.
 if args.conffile:
-    conf = Path(args.conffile)
-    if not get_conf(conf):
-        sys.exit('Conf file "{}" does not exist.'.format(args.conffile))
+    conffile = Path(args.conffile)
+    if not conffile.exists():
+        sys.exit('Conf file "{}" does not exist.'.format(conffile))
 else:
     for confdir in CONFDIRS:
-        conf = Path(confdir, CONFNAME)
-        if get_conf(conf):
+        conffile = Path(confdir, CONFNAME)
+        if conffile.exists():
             break
     else:
         sys.exit('No file {} in {}.'.format(CONFNAME,
             ' or '.join(CONFDIRS)))
+
+# Read and process the conf file
+get_conf(conffile)
 
 # Get touchpad device
 device = get_device(args.device) \
@@ -388,7 +384,7 @@ if args.verbose:
         platform.platform(), platform.python_version()))
 
     print('{}: using {} with {} gestures'.format(PROG,
-        conf, sum([len(h.motions) for h in handlers.values()])))
+        conffile, sum([len(h.motions) for h in handlers.values()])))
 
 # Note your must "sudo gpasswd -a $USER input" then log out/in for
 # permission to access the device.
