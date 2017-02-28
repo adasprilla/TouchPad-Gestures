@@ -360,8 +360,7 @@ else:
         if conffile.exists():
             break
     else:
-        sys.exit('No file {} in {}.'.format(CONFNAME,
-            ' or '.join(CONFDIRS)))
+        sys.exit('No file {} in {}.'.format(CONFNAME, ' or '.join(CONFDIRS)))
 
 # Read and process the conf file
 get_conf(conffile)
