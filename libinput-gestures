@@ -27,7 +27,7 @@ opt.add_argument('-d', '--debug', action='store_true',
         help='Output diagnostic messages only, do not action gestures')
 args = opt.parse_args()
 
-if args.debug:
+if args.debug or args.raw:
     args.verbose = True
 
 def open_lock(*args):
