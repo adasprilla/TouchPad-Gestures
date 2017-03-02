@@ -174,6 +174,14 @@ so, for example, page forward/back swipe gestures do work for Firefox
 and Chrome browsers when running on Wayland as per the default
 configuration.
 
+Note if your touchpad is capable of reporting 4 finger gestures and you
+are using GNOME on Wayland then you can already switch workspaces using
+4 finger swipe up and down gestures natively provided by GNOME. That is
+the only desktop touchpad gesture GNOME currently provides. In that
+case, if you still choose to run `libinput-gestures` to get extra
+gestures, be sure to disable the default `libinput-gestures` swipe
+up/down, or at least configure swipe up/down only for 3 fingers.
+
 ### TROUBLESHOOTING
 
 Please don't raise a github issue but provide litte information about
