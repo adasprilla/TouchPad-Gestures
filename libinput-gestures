@@ -55,53 +55,48 @@ def run(cmd, check=True):
 
     return stdout
 
-def get_device(name):
-    'Determine libinput touchpad device (path, name)'
+def get_devices_list():
+    'Get list of devices and their attributes (as a dict) from libinput'
     stdout = run('libinput-list-devices')
     if stdout:
-        devname = None
-        dev = None
-        devname_text = None
-        dev_text = None
-        has_size = False
+        dev = {}
         for line in stdout.splitlines():
             line = line.strip()
-            if not line or ':' not in line:
-                continue
+            if line and ':' in line:
+                key, value = line.split(':', maxsplit=1)
+                dev[key.strip().lower()] = value.strip()
+            elif dev:
+                yield(dev)
+                dev = {}
 
-            key, value = line.split(':', maxsplit=1)
-            key = key.strip()
-            value = value.strip()
+def get_device(name):
+    'Determine libinput touchpad device'
+    devices = list(get_devices_list())
 
-            # Look for touchpad
-            if key == 'Device':
-                devname = value
-                if not dev_text and re.search(r'touch ?pad', devname, re.I):
-                    devname_text = devname
-            elif key == 'Kernel':
-                dev = value
-                if devname and devname == name:
-                    return dev, devname
-                if not dev_text and devname_text:
-                    dev_text = dev
-                has_size = False
-            elif key == 'Size' and dev:
-                has_size = True
-            elif key == 'Capabilities' and value == 'pointer' and has_size \
-                    and not name:
-                return dev, devname
+    if not devices:
+        print('Can not see any devices, did you add yourself to the '
+                'input group?', file=sys.stderr)
+        return None
 
-        # If we did not find a touchpad using the regular search but at
-        # least found a device with the string "touchpad" in it's device
-        # name then return that.
-        if dev_text:
-            return dev_text, devname_text
+    # If a specific device name was asked for then return that device
+    if name:
+        for d in devices:
+            if d.get('device') == name:
+                return d
+        return None
 
-        if not devname:
-            print('Can not see any devices, did you add yourself to the '
-                    'input group?', file=sys.stderr)
+    # Otherwise look for 1st device with touchpad capabilities
+    for d in devices:
+        if 'size' in d and d.get('capabilities') == 'pointer':
+            return d
 
-    sys.exit('Could not determine touchpad device.')
+    # Otherwise look for 1st device with touchpad in it's name
+    for d in devices:
+        if re.search(r'touch ?pad', d.get('device', ''), re.I):
+            return d
+
+    # Give up
+    return None
 
 class COMMAND:
     'Generic command handler'
@@ -241,12 +236,14 @@ class SWIPE(GESTURE):
 
     def end(self):
         'Action this gesture at the end of a motion sequence'
+        x, y = self.data
+
         # Require movement beyond a small threshhold.
-        if abs(self.data[0] - self.data[1]) >= 70:
-            if abs(self.data[0]) > abs(self.data[1]):
-                motion = 'left' if self.data[0] < 0 else 'right'
+        if abs(x - y) >= 70:
+            if abs(x) > abs(y):
+                motion = 'left' if x < 0 else 'right'
             else:
-                motion = 'up' if self.data[1] < 0 else 'down'
+                motion = 'up' if y < 0 else 'down'
 
             self.action(motion)
 
@@ -366,13 +363,17 @@ else:
 get_conf(conffile)
 
 # Get touchpad device
-device = get_device(args.device) \
-        if not args.device or args.device.lower() != "all" else None
+if not args.device or args.device.lower() != "all":
+    device = get_device(args.device)
+    if not device:
+        sys.exit('Could not determine touchpad device.')
+else:
+    device = None
 
 if args.verbose:
     if device:
-        print('{}: device {}: {}'.format(PROG, device[0],
-            device[1]))
+        print('{}: device {}: {}'.format(PROG, device.get('kernel'),
+            device.get('device')))
     else:
         print('{}: monitoring all devices'.format(PROG))
 
@@ -387,7 +388,7 @@ if args.verbose:
 
 # Note your must "sudo gpasswd -a $USER input" then log out/in for
 # permission to access the device.
-devstr = ' --device {}'.format(device[0]) if device else ''
+devstr = ' --device {}'.format(device.get('kernel')) if device else ''
 command = 'stdbuf -oL -- libinput-debug-events{}'.format(devstr)
 
 cmd = subprocess.Popen(shlex.split(command), stdout=subprocess.PIPE,
