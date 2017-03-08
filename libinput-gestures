@@ -43,7 +43,7 @@ def open_lock(*args):
 
 def run(cmd, check=True):
     'Run subprocess function and return standard output or None'
-    # Maintain subprocess compatability with python 3.4 so use
+    # Maintain subprocess compatibility with python 3.4 so use
     # check_output() rather than run().
     try:
         stdout = subprocess.check_output(cmd, universal_newlines=True,
@@ -127,7 +127,7 @@ def add_internal_command(cls):
 class COMMAND_internal(COMMAND):
     'Internal command handler.'
     def __init__(self, args):
-        'Actional internal swipe commands'
+        'Action internal swipe commands'
         super().__init__(args)
 
         # Commands currently supported are:
