@@ -191,12 +191,18 @@ class GESTURE:
         'Initialise this gesture at program start'
         self.name = type(self).__name__
         self.motions = {}
+        self.has_incline = False
 
     def add(self, motion, fingers, command):
         'Add a configured motion command for this gesture'
         if motion not in self.SUPPORTED_MOTIONS:
             return 'Motion "{}" is not supported for {}'.format(motion,
                     self.name)
+
+        # If any inclined gestures configured then set flag to enable
+        # their discrimination
+        if '_' in motion:
+            self.has_incline = True
 
         key = (motion, fingers) if fingers else motion
         cmds = shlex.split(command)
@@ -222,7 +228,8 @@ class GESTURE:
 @add_gesture_handler
 class SWIPE(GESTURE):
     'Class to handle this type of gesture'
-    SUPPORTED_MOTIONS = ('left', 'right', 'up', 'down')
+    SUPPORTED_MOTIONS = ('left', 'right', 'up', 'down',
+            'left_up', 'right_up', 'left_down', 'right_down')
 
     def begin(self, fingers):
         'Initialise this gesture at the start of motion'
@@ -237,15 +244,26 @@ class SWIPE(GESTURE):
     def end(self):
         'Action this gesture at the end of a motion sequence'
         x, y = self.data
+        abx = abs(x)
+        aby = abs(y)
 
-        # Require movement beyond a small threshhold.
-        if abs(x - y) >= 70:
-            if abs(x) > abs(y):
-                motion = 'left' if x < 0 else 'right'
-            else:
-                motion = 'up' if y < 0 else 'down'
+        # Require movement beyond a small thresh-hold.
+        if abx < 70 and aby < 70:
+            return
 
-            self.action(motion)
+        # Discriminate left/right or up/down.
+        # If significant movement in both planes the consider it a
+        # inclined swipe (but only if any are configured)
+        if abx > aby:
+            motion = 'left' if x < 0 else 'right'
+            if self.has_incline and aby/abx > 0.66:
+                motion += ('_up' if y < 0 else '_down')
+        else:
+            motion = 'up' if y < 0 else 'down'
+            if self.has_incline and abx/aby > 0.66:
+                motion = ('left_' if x < 0 else 'right_') + motion
+
+        self.action(motion)
 
 @add_gesture_handler
 class PINCH(GESTURE):
