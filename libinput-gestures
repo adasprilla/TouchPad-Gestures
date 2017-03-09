@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 'Read gestures from libinput touchpad and action shell commands.'
 # Mark Blakeney, Sep 2015
-import os, sys, argparse, subprocess, shlex, re, getpass, fcntl, platform
+import os, sys, argparse, subprocess, shlex, re, getpass, fcntl, platform, math
 from pathlib import Path
 
 PROG = Path(sys.argv[0]).name
@@ -11,6 +11,10 @@ PROG = Path(sys.argv[0]).name
 CONFNAME = '{}.conf'.format(PROG)
 USERDIR = os.getenv('XDG_CONFIG_DIR', os.path.expanduser('~/.config'))
 CONFDIRS = (USERDIR, '/etc')
+
+# Angle of incline at which we consider an inclined swipe gesture.
+# Number is in degrees.
+INCLINE = math.tan(math.radians(30))
 
 # Set up command line arguments
 opt = argparse.ArgumentParser(description=__doc__)
@@ -256,11 +260,11 @@ class SWIPE(GESTURE):
         # inclined swipe (but only if any are configured)
         if abx > aby:
             motion = 'left' if x < 0 else 'right'
-            if self.has_incline and aby/abx > 0.66:
+            if self.has_incline and aby / abx > INCLINE:
                 motion += ('_up' if y < 0 else '_down')
         else:
             motion = 'up' if y < 0 else 'down'
-            if self.has_incline and abx/aby > 0.66:
+            if self.has_incline and abx / aby > INCLINE:
                 motion = ('left_' if x < 0 else 'right_') + motion
 
         self.action(motion)
