@@ -200,8 +200,8 @@ class GESTURE:
     def add(self, motion, fingers, command):
         'Add a configured motion command for this gesture'
         if motion not in self.SUPPORTED_MOTIONS:
-            return 'Motion "{}" is not supported for {}'.format(motion,
-                    self.name)
+            return 'Motion "{}" is not supported for {}.\nMust be "{}"'.format(
+                    motion, self.name, '" or "'.join(self.SUPPORTED_MOTIONS))
 
         # If any inclined gestures configured then set flag to enable
         # their discrimination
@@ -251,7 +251,7 @@ class SWIPE(GESTURE):
         abx = abs(x)
         aby = abs(y)
 
-        # Require movement beyond a small thresh-hold.
+        # Require absolute movement beyond a small thresh-hold.
         if abx < 70 and aby < 70:
             return
 
@@ -302,13 +302,14 @@ def conf_gesture(lineargs):
 
     # Look for configured gesture. Sanity check the line.
     if len(fields) < 3:
-        return 'Invalid gesture line'
+        return 'Invalid gesture line - not enough fields'
 
     gesture, motion, command = fields
 
     handler = handlers.get(gesture.upper())
     if not handler:
-        return 'Gesture "{}" is not supported'.format(gesture)
+        return 'Gesture "{}" is not supported.\nMust be "{}"'.format(
+                gesture, '" or "'.join([h.lower() for h in handlers]))
 
     # Gesture command can be configured with optional specific finger
     # count so look for that
@@ -334,32 +335,32 @@ def conf_device(lineargs):
 
 def get_conf_line(line):
     'Process a single line in conf file'
-
     fields = line.split(maxsplit=1)
     if len(fields) < 2:
-        return 'Invalid configuration line'
+        return 'Invalid configuration line - not enough fields'
 
     key, lineargs = fields
     key = key.rstrip(':')
     conf_func = conf_commands.get(key)
 
     if not conf_func:
-        return 'Configuration command "{}" is not supported'.format(key)
+        return 'Configuration command "{}" is not supported.\n' \
+                'Must be "{}"'.format(key, '" or "'.join(conf_commands))
 
     return conf_func(lineargs)
 
 def get_conf(conffile):
     'Read given configuration file and store internal actions etc'
     with conffile.open() as fp:
-        for line in fp:
+        for num, line in enumerate(fp, 1):
             line = line.strip()
             if not line or line[0] == '#':
                 continue
 
             errmsg = get_conf_line(line)
             if errmsg:
-                sys.exit('Error in file {} at line:\n{}.\n{}.'.format(
-                    conffile, line, errmsg))
+                sys.exit('Error at line {} in file {}:\n>> {} <<\n{}.'.format(
+                    num, conffile, line, errmsg))
 
 # Make sure only one instance running for current user
 user = getpass.getuser()
