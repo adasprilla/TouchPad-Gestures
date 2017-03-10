@@ -200,8 +200,9 @@ class GESTURE:
     def add(self, motion, fingers, command):
         'Add a configured motion command for this gesture'
         if motion not in self.SUPPORTED_MOTIONS:
-            return 'Motion "{}" is not supported for {}.\nMust be "{}"'.format(
-                    motion, self.name, '" or "'.join(self.SUPPORTED_MOTIONS))
+            return 'Gesture {} does not support motion "{}".\n' \
+                    'Must be "{}"'.format(self.name.lower(), motion,
+                            '" or "'.join(self.SUPPORTED_MOTIONS))
 
         # If any inclined gestures configured then set flag to enable
         # their discrimination
@@ -216,7 +217,6 @@ class GESTURE:
 
     def action(self, motion):
         'Action a motion command for this gesture'
-
         command = self.motions.get((motion, self.fingers)) or \
                 self.motions.get(motion)
 
@@ -305,8 +305,8 @@ def conf_gesture(lineargs):
         return 'Invalid gesture line - not enough fields'
 
     gesture, motion, command = fields
-
     handler = handlers.get(gesture.upper())
+
     if not handler:
         return 'Gesture "{}" is not supported.\nMust be "{}"'.format(
                 gesture, '" or "'.join([h.lower() for h in handlers]))
