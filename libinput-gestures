@@ -12,9 +12,12 @@ CONFNAME = '{}.conf'.format(PROG)
 USERDIR = os.getenv('XDG_CONFIG_DIR', os.path.expanduser('~/.config'))
 CONFDIRS = (USERDIR, '/etc')
 
-# Angle of incline at which we consider an inclined swipe gesture.
-# Number is in degrees.
-INCLINE = math.tan(math.radians(30))
+# Ratio of X/Y (or Y/X) at which we consider an oblique swipe gesture.
+# The number is the trigger angle in degrees.
+OBLIQUE_RATIO = math.tan(math.radians(22.5))
+
+# Minimum significant distance to move, in dots squared.
+ABZSQUARE = 70**2
 
 # Set up command line arguments
 opt = argparse.ArgumentParser(description=__doc__)
@@ -195,7 +198,7 @@ class GESTURE:
         'Initialise this gesture at program start'
         self.name = type(self).__name__
         self.motions = {}
-        self.has_incline = False
+        self.has_oblique = False
 
     def add(self, motion, fingers, command):
         'Add a configured motion command for this gesture'
@@ -204,10 +207,10 @@ class GESTURE:
                     'Must be "{}"'.format(self.name.lower(), motion,
                             '" or "'.join(self.SUPPORTED_MOTIONS))
 
-        # If any inclined gestures configured then set flag to enable
+        # If any oblique gestures configured then set flag to enable
         # their discrimination
         if '_' in motion:
-            self.has_incline = True
+            self.has_oblique = True
 
         key = (motion, fingers) if fingers else motion
         cmds = shlex.split(command)
@@ -251,20 +254,20 @@ class SWIPE(GESTURE):
         abx = abs(x)
         aby = abs(y)
 
-        # Require absolute movement beyond a small thresh-hold.
-        if abx < 70 and aby < 70:
+        # Require absolute distance movement beyond a small thresh-hold.
+        if abx**2 + aby**2 < ABZSQUARE:
             return
 
         # Discriminate left/right or up/down.
         # If significant movement in both planes the consider it a
-        # inclined swipe (but only if any are configured)
+        # oblique swipe (but only if any are configured)
         if abx > aby:
             motion = 'left' if x < 0 else 'right'
-            if self.has_incline and aby / abx > INCLINE:
+            if self.has_oblique and aby / abx > OBLIQUE_RATIO:
                 motion += ('_up' if y < 0 else '_down')
         else:
             motion = 'up' if y < 0 else 'down'
-            if self.has_incline and abx / aby > INCLINE:
+            if self.has_oblique and abx / aby > OBLIQUE_RATIO:
                 motion = ('left_' if x < 0 else 'right_') + motion
 
         self.action(motion)
@@ -400,9 +403,9 @@ if args.verbose:
     else:
         print('{}: monitoring all devices'.format(PROG))
 
-    xsession = os.getenv('XDG_SESSION_DESKTOP',
-            os.getenv('DESKTOP_SESSION', 'unknown'))
-    xtype = os.getenv('XDG_SESSION_TYPE', 'unknown')
+    xsession = os.getenv('XDG_SESSION_DESKTOP') or \
+            os.getenv('DESKTOP_SESSION') or 'unknown'
+    xtype = os.getenv('XDG_SESSION_TYPE') or 'unknown'
     print('{}: session {}+{} on {} and python {}'.format(PROG, xsession, xtype,
         platform.platform(), platform.python_version()))
 
