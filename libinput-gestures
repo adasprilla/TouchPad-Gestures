@@ -206,6 +206,8 @@ class GESTURE:
             return 'Gesture {} does not support motion "{}".\n' \
                     'Must be "{}"'.format(self.name.lower(), motion,
                             '" or "'.join(self.SUPPORTED_MOTIONS))
+        if not command:
+            return 'No command configured'
 
         # If any oblique gestures configured then set flag to enable
         # their discrimination
@@ -316,13 +318,11 @@ def conf_gesture(lineargs):
 
     # Gesture command can be configured with optional specific finger
     # count so look for that
-    fingers = None
-    fcommand = command.split(maxsplit=1)
-    if len(fcommand) > 1:
-        fcount, ncommand = fcommand
-        if fcount.isdigit() and len(fcount) == 1:
-            command = ncommand
-            fingers = fcount
+    fingers, *fcommand = command.split(maxsplit=1)
+    if fingers.isdigit() and len(fingers) == 1:
+        command = fcommand[0] if fcommand else ''
+    else:
+        fingers = None
 
     # Add the configured gesture
     return handler.add(motion.lower(), fingers, command)
@@ -338,11 +338,7 @@ def conf_device(lineargs):
 
 def get_conf_line(line):
     'Process a single line in conf file'
-    fields = line.split(maxsplit=1)
-    if len(fields) < 2:
-        return 'Invalid configuration line - not enough fields'
-
-    key, lineargs = fields
+    key, *argslist = line.split(maxsplit=1)
     key = key.rstrip(':')
     conf_func = conf_commands.get(key)
 
@@ -350,7 +346,7 @@ def get_conf_line(line):
         return 'Configuration command "{}" is not supported.\n' \
                 'Must be "{}"'.format(key, '" or "'.join(conf_commands))
 
-    return conf_func(lineargs)
+    return conf_func(argslist[0] if argslist else '')
 
 def get_conf(conffile):
     'Read given configuration file and store internal actions etc'
@@ -420,11 +416,11 @@ command = 'stdbuf -oL -- libinput-debug-events{}'.format(devstr)
 cmd = subprocess.Popen(shlex.split(command), stdout=subprocess.PIPE,
         bufsize=0, universal_newlines=True)
 
-# Sit in a loop forever reading the libinput debug output for GESTURES ..
+# Sit in a loop forever reading the libinput messages ..
 handler = None
 for line in cmd.stdout:
 
-    # Just output raw messages if in that debug mode
+    # Just output raw messages if in that mode
     if args.raw:
         print(line.strip())
         continue
@@ -433,13 +429,11 @@ for line in cmd.stdout:
     if 'GESTURE_' not in line:
         continue
 
-    # Split debug line into relevant fields
+    # Split received message line into relevant fields
     dev, gevent, time, other = line.strip().split(maxsplit=3)
     gesture, event = gevent[8:].split('_')
-    if ' ' in other:
-        fingers, params = other.split(maxsplit=1)
-    else:
-        fingers, params = other, None
+    fingers, *argslist = other.split(maxsplit=1)
+    params = argslist[0] if argslist else ''
 
     # Action each type of event
     if event == 'UPDATE':
@@ -454,7 +448,7 @@ for line in cmd.stdout:
                     file=sys.stderr)
     elif event == 'END':
         # Ignore gesture if final action is cancelled
-        if params != 'cancelled' and handler:
+        if handler and params != 'cancelled':
             handler.end()
         handler = None
     else:
