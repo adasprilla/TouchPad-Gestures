@@ -22,16 +22,18 @@ ABZSQUARE = 70**2
 # Set up command line arguments
 opt = argparse.ArgumentParser(description=__doc__)
 opt.add_argument('-c', '--conffile',
-        help='Gestures alternative configuration file')
+        help='alternative configuration file')
 opt.add_argument('-v', '--verbose', action='store_true',
-        help='Output diagnostic messages')
-opt.add_argument('-r', '--raw', action='store_true',
-        help='Output raw libinput-debug-event messages only, '
-        'do not action gestures')
-opt.add_argument('--device',
-        help='device name to use, explicitly specified')
+        help='output diagnostic messages')
 opt.add_argument('-d', '--debug', action='store_true',
-        help='Output diagnostic messages only, do not action gestures')
+        help='output diagnostic messages only, do not action gestures')
+opt.add_argument('-r', '--raw', action='store_true',
+        help='output raw libinput-debug-event messages only, '
+        'do not action gestures')
+opt.add_argument('-l', '--list', action='store_true',
+        help='just list out available and configured gestures')
+opt.add_argument('--device',
+        help='explicit device name to use')
 args = opt.parse_args()
 
 if args.debug or args.raw:
@@ -361,12 +363,6 @@ def get_conf(conffile):
                 sys.exit('Error at line {} in file {}:\n>> {} <<\n{}.'.format(
                     num, conffile, line, errmsg))
 
-# Make sure only one instance running for current user
-user = getpass.getuser()
-proglock = open_lock(PROG, user)
-if not proglock:
-    sys.exit('{} is already running for {}, terminating ..'.format(PROG, user))
-
 # Search for configuration file. Use file given as command line
 # argument, else look for file in search dir order.
 if args.conffile:
@@ -384,6 +380,15 @@ else:
 # Read and process the conf file
 get_conf(conffile)
 
+# Just list out available gestures if that is asked for
+if args.list:
+    print('Gestures configured in {}:'.format(conffile))
+    for h in handlers.values():
+        for m in h.SUPPORTED_MOTIONS:
+            cmd = h.motions.get(m, '<not configured>')
+            print('{} {:10} {}'.format(h.name.lower(), m, cmd))
+    sys.exit()
+
 # Get touchpad device
 if not args.device or args.device.lower() != "all":
     device = get_device(args.device)
@@ -399,14 +404,22 @@ if args.verbose:
     else:
         print('{}: monitoring all devices'.format(PROG))
 
+    libvers = run(('libinput-list-devices', '--version')).strip()
     xsession = os.getenv('XDG_SESSION_DESKTOP') or \
             os.getenv('DESKTOP_SESSION') or 'unknown'
     xtype = os.getenv('XDG_SESSION_TYPE') or 'unknown'
-    print('{}: session {}+{} on {} and python {}'.format(PROG, xsession, xtype,
-        platform.platform(), platform.python_version()))
+    print('{}: session {}+{} on {}, python {}, libinput {}'.format(PROG,
+        xsession, xtype, platform.platform(), platform.python_version(),
+        libvers))
 
     print('{}: using {} with {} gestures'.format(PROG,
         conffile, sum([len(h.motions) for h in handlers.values()])))
+
+# Make sure only one instance running for current user
+user = getpass.getuser()
+proglock = open_lock(PROG, user)
+if not proglock:
+    sys.exit('{} is already running for {}, terminating ..'.format(PROG, user))
 
 # Note your must "sudo gpasswd -a $USER input" then log out/in for
 # permission to access the device.

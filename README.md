@@ -13,7 +13,7 @@ per the default configuration.
 This small and simple utility is only intended to be used temporarily
 until GNOME and other DE's action libinput gestures natively. It parses
 the output of the _libinput-list-devices_ and _libinput-debug-events_
-utilties so is a little fragile to any version changes in their output
+utilities so is a little fragile to any version changes in their output
 format.
 
 This utility is developed and tested on Arch linux using the GNOME 3 DE
@@ -169,7 +169,7 @@ desktops, it is now the default configuration command for swipe up and
 down commands in `libinput-gestures.conf`. See the comments in that file
 about other options you can do with the `_internal` command.
 
-Of course, `xdotool` commands do work via Xwayland for Xorg based apps
+Of course, `xdotool` commands do work via XWayland for Xorg based apps
 so, for example, page forward/back swipe gestures do work for Firefox
 and Chrome browsers when running on Wayland as per the default
 configuration.
@@ -184,7 +184,7 @@ up/down, or at least configure swipe up/down only for 3 fingers.
 
 ### TROUBLESHOOTING
 
-Please don't raise a github issue but provide litte information about
+Please don't raise a github issue but provide little information about
 your problem.
 
 1. Ensure you are running the latest version from the
@@ -216,7 +216,8 @@ your problem.
    possible.
 
 6. If you raise an issue, please paste the screen output from steps 3
-   and 4 above.
+   and 4 above. If appropriate, also paste the output of
+   `libinput-gestures -l` to show what gestures you have configured.
 
 ### LICENSE
 
