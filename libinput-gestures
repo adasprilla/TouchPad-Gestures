@@ -363,6 +363,16 @@ def get_conf(conffile):
                 sys.exit('Error at line {} in file {}:\n>> {} <<\n{}.'.format(
                     num, conffile, line, errmsg))
 
+def unexpanduser(cfile):
+    'Return absolute path name, with $HOME replaced by ~'
+    relslash = cfile.resolve()
+    try:
+        relhome = relslash.relative_to(os.getenv('HOME'))
+    except:
+        relhome = None
+
+    return ('~/' + str(relhome)) if relhome else str(relslash)
+
 # Search for configuration file. Use file given as command line
 # argument, else look for file in search dir order.
 if args.conffile:
@@ -375,14 +385,18 @@ else:
         if conffile.exists():
             break
     else:
-        sys.exit('No file {} in {}.'.format(CONFNAME, ' or '.join(CONFDIRS)))
+        sys.exit('No file {} in {}.'.format(CONFNAME, ' or '.join(
+            [unexpanduser(Path(c)) for c in CONFDIRS])))
+
+# Hide any personal user dir/names from diag output
+confname = unexpanduser(conffile)
 
 # Read and process the conf file
 get_conf(conffile)
 
 # Just list out available gestures if that is asked for
 if args.list:
-    print('Gestures configured in {}:'.format(conffile))
+    print('Gestures configured in {}:'.format(confname))
     for h in handlers.values():
         for m in h.SUPPORTED_MOTIONS:
             cmd = h.motions.get(m, '<not configured>')
@@ -413,7 +427,7 @@ if args.verbose:
         libvers))
 
     print('{}: using {} with {} gestures'.format(PROG,
-        conffile, sum([len(h.motions) for h in handlers.values()])))
+        confname, sum([len(h.motions) for h in handlers.values()])))
 
 # Make sure only one instance running for current user
 user = getpass.getuser()
