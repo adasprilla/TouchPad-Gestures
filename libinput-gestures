@@ -16,8 +16,11 @@ CONFDIRS = (USERDIR, '/etc')
 # The number is the trigger angle in degrees.
 OBLIQUE_RATIO = math.tan(math.radians(22.5))
 
-# Minimum significant distance to move, in dots squared.
+# Minimum significant distance to move for swipes, in dots squared.
 ABZSQUARE = 70**2
+
+# Rotation threshhold in degrees to discriminate pinch rotate from in/out
+ROTATE_ANGLE = 15.0
 
 # Set up command line arguments
 opt = argparse.ArgumentParser(description=__doc__)
@@ -200,7 +203,7 @@ class GESTURE:
         'Initialise this gesture at program start'
         self.name = type(self).__name__
         self.motions = {}
-        self.has_oblique = False
+        self.has_extended = False
 
     def add(self, motion, fingers, command):
         'Add a configured motion command for this gesture'
@@ -211,16 +214,21 @@ class GESTURE:
         if not command:
             return 'No command configured'
 
-        # If any oblique gestures configured then set flag to enable
+        # If any extended gestures configured then set flag to enable
         # their discrimination
-        if '_' in motion:
-            self.has_oblique = True
+        if self.extended_text in motion:
+            self.has_extended = True
 
         key = (motion, fingers) if fingers else motion
         cmds = shlex.split(command)
         cls = internal_commands.get(cmds[0], COMMAND)
         self.motions[key] = cls(cmds)
         return None
+
+    def begin(self, fingers):
+        'Initialise this gesture at the start of motion'
+        self.fingers = fingers
+        self.data = [0.0, 0.0]
 
     def action(self, motion):
         'Action a motion command for this gesture'
@@ -241,11 +249,7 @@ class SWIPE(GESTURE):
     'Class to handle this type of gesture'
     SUPPORTED_MOTIONS = ('left', 'right', 'up', 'down',
             'left_up', 'right_up', 'left_down', 'right_down')
-
-    def begin(self, fingers):
-        'Initialise this gesture at the start of motion'
-        self.fingers = fingers
-        self.data = [0.0, 0.0]
+    extended_text = '_'
 
     def update(self, coords):
         'Update this gesture for a motion'
@@ -267,11 +271,11 @@ class SWIPE(GESTURE):
         # oblique swipe (but only if any are configured)
         if abx > aby:
             motion = 'left' if x < 0 else 'right'
-            if self.has_oblique and aby / abx > OBLIQUE_RATIO:
+            if self.has_extended and aby / abx > OBLIQUE_RATIO:
                 motion += ('_up' if y < 0 else '_down')
         else:
             motion = 'up' if y < 0 else 'down'
-            if self.has_oblique and abx / aby > OBLIQUE_RATIO:
+            if self.has_extended and abx / aby > OBLIQUE_RATIO:
                 motion = ('left_' if x < 0 else 'right_') + motion
 
         self.action(motion)
@@ -279,21 +283,22 @@ class SWIPE(GESTURE):
 @add_gesture_handler
 class PINCH(GESTURE):
     'Class to handle this type of gesture'
-    SUPPORTED_MOTIONS = ('in', 'out')
-
-    def begin(self, fingers):
-        'Initialise this gesture at the start of motion'
-        self.fingers = fingers
-        self.data = 0.0
+    SUPPORTED_MOTIONS = ('in', 'out', 'clockwise', 'anticlockwise')
+    extended_text = 'clock'
 
     def update(self, coords):
         'Update this gesture for a motion'
-        self.data += 1.0 - float(coords[5])
+        self.data[0] += float(coords[4]) - 1.0
+        self.data[1] += float(coords[5])
 
     def end(self):
         'Action this gesture at the end of a motion sequence'
-        if self.data != 0.0:
-            self.action('in' if self.data >= 0.0 else 'out')
+        ratio, angle = self.data
+
+        if self.has_extended and abs(angle) > ROTATE_ANGLE:
+            self.action('clockwise' if angle >= 0.0 else 'anticlockwise')
+        elif ratio != 0.0:
+            self.action('in' if ratio <= 0.0 else 'out')
 
 # Table of configuration commands
 conf_commands = {}
@@ -465,7 +470,8 @@ for line in cmd.stdout:
     # Action each type of event
     if event == 'UPDATE':
         if handler:
-            handler.update(re.split(r'[ (/@]+', params))
+            # Split parameters into list of clean numbers
+            handler.update(re.split(r'[^-.\d]+', params))
     elif event == 'BEGIN':
         handler = handlers.get(gesture)
         if handler:
