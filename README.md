@@ -168,6 +168,8 @@ Wayland and Xorg, and with GNOME, KDE, and other EWMH compliant
 desktops, it is now the default configuration command for swipe up and
 down commands in `libinput-gestures.conf`. See the comments in that file
 about other options you can do with the `_internal` command.
+Unfortunately `_internal` does not currently work with Compiz for Ubuntu
+Unity desktop so also see the explicit example there for Unity.
 
 Of course, `xdotool` commands do work via XWayland for Xorg based apps
 so, for example, page forward/back swipe gestures do work for Firefox
