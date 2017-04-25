@@ -217,9 +217,11 @@ your problem.
    your specific touchpad device and/or laptop/pc. Update your BIOS if
    possible.
 
-6. If you raise an issue, please paste the screen output from steps 3
-   and 4 above. If appropriate, also paste the output of
-   `libinput-gestures -l` to show what gestures you have configured.
+6. If you raise an issue, **always** include the output of
+   `libinput-gestures -e` to show the environment you are using.
+    Also paste the output from steps 3 and 4 above.
+    If appropriate, paste the output of `libinput-gestures -l` to
+    show what gestures you have configured.
 
 ### LICENSE
 
