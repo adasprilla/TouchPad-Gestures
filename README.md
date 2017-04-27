@@ -108,7 +108,6 @@ gestures, missing packages, etc:
 Confirm that the correct commands are reported for your 3 finger
 swipe up/down/left/right gestures, and your 2 or 3 finger pinch
 in/out gestures. Some touchpads can also support 4 finger gestures.
-
 If you have problems then follow the TROUBLESHOOTING steps below.
 
 ### STARTING AND STOPPING
@@ -124,7 +123,7 @@ You can stop the background app with:
     libinput-gestures-setup stop
 
 You can enable the app to start automatically in the background when you
-log in with:
+log in (on an XDG compliant DE such as GNOME and KDE) with:
 
     libinput-gestures-setup autostart
 

@@ -61,7 +61,12 @@ launch() {
 	return $?
     fi
 
-    echo "Don't know how to start $app" >&2
+    if hash i3-msg &>/dev/null; then
+	i3-msg exec $BINDIR/$APP >/dev/null
+	return $?
+    fi
+
+    echo "Don't know how to invoke $app.desktop" >&2
     return 1
 }
 
