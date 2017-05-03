@@ -33,8 +33,8 @@ to read the touchpad device:
 
     sudo gpasswd -a $USER input
 
-After executing the above command, **log out of your session completely**, and then
-log back in to assign this group.
+After executing the above command, **log out of your session
+completely**, and then log back in to assign this group.
 
 NOTE: Arch users can just install [_libinput-gestures from the
 AUR_][AUR]. Then skip to the next CONFIGURATION section.
@@ -191,11 +191,14 @@ your problem.
 1. Ensure you are running the latest version from the
    [libinput-gestures github repository][REPO] or from the [Arch AUR][AUR].
 
-2. Ensure you have followed the installation instructions here carefully.
-   Perhaps temporarily remove your custom configuration to try with the
+2. Ensure you have followed the installation instructions here
+   carefully. The most common mistake is that you have not added your
+   user to the _input_ group and re-logged in as described above.
+
+3. Perhaps temporarily remove your custom configuration to try with the
    default configuration.
 
-3. Run `libinput-gestures` on the command line in debug mode while
+4. Run `libinput-gestures` on the command line in debug mode while
    performing some 3 and 4 finger left/right/up/down swipes, and some
    pinch in/outs. In debug mode, configured commands are not executed,
    they are merely output to the screen:
@@ -204,7 +207,7 @@ your problem.
 	libinput-gestures -d
 	(<ctrl-c> to stop)
     ````
-4. Run `libinput-gestures` in raw mode by repeating the same commands as
+5. Run `libinput-gestures` in raw mode by repeating the same commands as
    above step but use the `-r` (--raw) switch instead of `-d` (--debug).
    Raw mode does nothing more than echo the raw gesture events received
    from `libinput-debug-events`. If you see POINTER_* events but no
@@ -212,11 +215,11 @@ your problem.
    combination can report simple finger movements but does not report
    multi-finger gestures so `libinput-gestures` will not work.
 
-5. Search the web for Linux kernel and/or libinput issues relating to
+6. Search the web for Linux kernel and/or libinput issues relating to
    your specific touchpad device and/or laptop/pc. Update your BIOS if
    possible.
 
-6. If you raise an issue, **always** include the output of
+7. If you raise an issue, **always** include the output of
    `libinput-gestures -e` to show the environment you are using.
     Also paste the output from steps 3 and 4 above.
     If appropriate, paste the output of `libinput-gestures -l` to
