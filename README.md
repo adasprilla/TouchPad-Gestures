@@ -189,7 +189,7 @@ up/down, or at least configure swipe up/down only for 3 fingers.
 They are not enabled in the default `libinput-gestures.conf`
 configuration file but you can enable extended gestures which augment
 the gestures listed above in CONFIGURATION. See the commented out
-examples in `libinput-gestures.conf`
+examples in `libinput-gestures.conf`.
 
 - swipe right_up (e.g. jump to next open browser tab)
 - swipe left_up (e.g. jump to previous open browser tab)
