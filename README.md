@@ -184,6 +184,26 @@ case, if you still choose to run `libinput-gestures` to get extra
 gestures, be sure to disable the default `libinput-gestures` swipe
 up/down, or at least configure swipe up/down only for 3 fingers.
 
+### EXTENDED GESTURES
+
+They are not enabled in the default `libinput-gestures.conf`
+configuration file but you can enable extended gestures which augment
+the gestures listed above in CONFIGURATION. See the commented out
+examples in `libinput-gestures.conf`
+
+- swipe right_up (e.g. jump to next open browser tab)
+- swipe left_up (e.g. jump to previous open browser tab)
+- swipe left_down (e.g. close current browser tab)
+- swipe right_down (e.g. reopen and jump to last closed browser tab)
+- swipe pinch clockwise
+- swipe pinch anticlockwise
+
+So instead of just configuring swipe up/down and left/right each at 90
+degrees, you can add the above extra 4 swipes for 45 degree swipes to
+give a total of 8 swipe gestures over 360 degrees. It works better than
+you may expect, at least after some practice. It means you can
+completely manage browser tabs from your touchpad.
+
 ### TROUBLESHOOTING
 
 Please don't raise a github issue but provide little information about
