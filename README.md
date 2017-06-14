@@ -86,6 +86,10 @@ are:
 - pinch in (e.g. map to GNOME open/close overview)
 - pinch out (e.g. map to GNOME open/close overview)
 
+NOTE: If you don't use "natural" scrolling direction for your touchpad
+then you may want to swap the default left/right and up/down
+configurations.
+
 You can choose to specify a specific finger count, typically 3 or 4
 fingers. If specified then the command is executed when exactly that
 number of fingers is used in the gesture. If not specified then the
@@ -223,11 +227,11 @@ your problem.
    performing some 3 and 4 finger left/right/up/down swipes, and some
    pinch in/outs. In debug mode, configured commands are not executed,
    they are merely output to the screen:
-    ````
+   ````
 	libinput-gestures-setup stop
 	libinput-gestures -d
 	(<ctrl-c> to stop)
-    ````
+   ````
 5. Run `libinput-gestures` in raw mode by repeating the same commands as
    above step but use the `-r` (--raw) switch instead of `-d` (--debug).
    Raw mode does nothing more than echo the raw gesture events received
@@ -242,9 +246,9 @@ your problem.
 
 7. If you raise an issue, **always** include the output of
    `libinput-gestures -e` to show the environment you are using.
-    Also paste the output from steps 3 and 4 above.
-    If appropriate, paste the output of `libinput-gestures -l` to
-    show what gestures you have configured.
+   Also paste the output from steps 3 and 4 above.
+   If appropriate, paste the output of `libinput-gestures -l` to
+   show what gestures you have configured.
 
 ### LICENSE
 
