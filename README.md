@@ -238,7 +238,9 @@ your problem.
    from `libinput-debug-events`. If you see POINTER_* events but no
    GESTURE_* events then unfortunately your touchpad and/or libinput
    combination can report simple finger movements but does not report
-   multi-finger gestures so `libinput-gestures` will not work.
+   multi-finger gestures so `libinput-gestures` will not work. Also note
+   that discrimination of SWIPE and PINCH gestures is done completely
+   within libinput.
 
 6. Search the web for Linux kernel and/or libinput issues relating to
    your specific touchpad device and/or laptop/pc. Update your BIOS if
