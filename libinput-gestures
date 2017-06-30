@@ -2,6 +2,7 @@
 'Read gestures from libinput touchpad and action shell commands.'
 # Mark Blakeney, Sep 2015
 import os, sys, argparse, subprocess, shlex, re, getpass, fcntl, platform, math
+from collections import OrderedDict
 from pathlib import Path
 
 PROG = Path(sys.argv[0]).name
@@ -126,7 +127,7 @@ class COMMAND:
         return ' '.join(self.argslist)
 
 # Table of internal commands
-internal_commands = {}
+internal_commands = OrderedDict()
 
 def add_internal_command(cls):
     'Add configuration command to command lookup table based on name'
@@ -193,7 +194,7 @@ class COMMAND_internal(COMMAND):
             run(('wmctrl', '-s', str(index)))
 
 # Table of gesture handlers
-handlers = {}
+handlers = OrderedDict()
 
 def add_gesture_handler(cls):
     'Create gesture handler instance and add to lookup table based on name'
@@ -204,7 +205,7 @@ class GESTURE:
     def __init__(self):
         'Initialise this gesture at program start'
         self.name = type(self).__name__
-        self.motions = {}
+        self.motions = OrderedDict()
         self.has_extended = False
 
     def add(self, motion, fingers, command):
@@ -303,7 +304,7 @@ class PINCH(GESTURE):
             self.action('in' if ratio <= 0.0 else 'out')
 
 # Table of configuration commands
-conf_commands = {}
+conf_commands = OrderedDict()
 
 def add_conf_command(func):
     'Add configuration command to command lookup table based on name'
@@ -405,9 +406,10 @@ get_conf(conffile)
 if args.list:
     print('Gestures configured in {}:'.format(confname))
     for h in handlers.values():
-        for m in h.SUPPORTED_MOTIONS:
-            cmd = h.motions.get(m, '<not configured>')
-            print('{} {:10} {}'.format(h.name.lower(), m, cmd))
+        for mpair, cmd in h.motions.items():
+            motion, fingers = (mpair, '') if isinstance(mpair, str) else mpair
+            print('{} {:10}{:>2} {}'.format(h.name.lower(), motion,
+                fingers, cmd))
     sys.exit()
 
 # Get touchpad device

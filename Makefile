@@ -25,6 +25,9 @@ install:
 uninstall:
 	@./libinput-gestures-setup -d "$(DESTDIR)" uninstall
 
+check:
+	flake8 libinput-gestures
+
 doc:	$(DOCOUT)
 
 $(DOCOUT): $(DOC)
