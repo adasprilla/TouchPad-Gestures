@@ -4,6 +4,7 @@
 import os, sys, argparse, subprocess, shlex, re, getpass, fcntl, platform, math
 from collections import OrderedDict
 from pathlib import Path
+from distutils.version import LooseVersion as Version
 
 PROG = Path(sys.argv[0]).name
 
@@ -32,7 +33,7 @@ opt.add_argument('-v', '--verbose', action='store_true',
 opt.add_argument('-d', '--debug', action='store_true',
         help='output diagnostic messages only, do not action gestures')
 opt.add_argument('-r', '--raw', action='store_true',
-        help='output raw libinput-debug-event messages only, '
+        help='output raw libinput debug-event messages only, '
         'do not action gestures')
 opt.add_argument('-l', '--list', action='store_true',
         help='just list out available and configured gestures')
@@ -70,9 +71,25 @@ def run(cmd, check=True):
 
     return stdout
 
+def get_libinput_vers():
+    'Return the libinput installed version number string'
+    # Try to use newer libinput interface then fall back to old
+    # (depreciated) interface.
+    res = run(('libinput', '--version'), check=False)
+    return res.strip() if res else run(('libinput-list-devices', '--version'))
+
+# Libinput changed the way in which it's utilities are called
+libvers = get_libinput_vers()
+if Version(libvers) >= Version('1.8'):
+    cmd_debug_events = 'libinput debug-events'
+    cmd_list_devices = 'libinput list-devices'
+else:
+    cmd_debug_events = 'libinput-debug-events'
+    cmd_list_devices = 'libinput-list-devices'
+
 def get_devices_list():
     'Get list of devices and their attributes (as a dict) from libinput'
-    stdout = run('libinput-list-devices')
+    stdout = run(cmd_list_devices.split())
     if stdout:
         dev = {}
         for line in stdout.splitlines():
@@ -427,7 +444,6 @@ if args.verbose:
     else:
         print('{}: monitoring all devices'.format(PROG))
 
-    libvers = run(('libinput-list-devices', '--version')).strip()
     xsession = os.getenv('XDG_SESSION_DESKTOP') or \
             os.getenv('DESKTOP_SESSION') or 'unknown'
     xtype = os.getenv('XDG_SESSION_TYPE') or 'unknown'
@@ -451,7 +467,7 @@ if not proglock:
 # Note your must "sudo gpasswd -a $USER input" then log out/in for
 # permission to access the device.
 devstr = ' --device {}'.format(device.get('kernel')) if device else ''
-command = 'stdbuf -oL -- libinput-debug-events{}'.format(devstr)
+command = 'stdbuf -oL -- {}{}'.format(cmd_debug_events, devstr)
 
 cmd = subprocess.Popen(shlex.split(command), stdout=subprocess.PIPE,
         bufsize=0, universal_newlines=True)

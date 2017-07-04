@@ -12,7 +12,7 @@ per the default configuration.
 
 This small and simple utility is only intended to be used temporarily
 until GNOME and other DE's action libinput gestures natively. It parses
-the output of the _libinput-list-devices_ and _libinput-debug-events_
+the output of the _libinput list-devices_ and _libinput debug-events_
 utilities so is a little fragile to any version changes in their output
 format.
 
@@ -235,7 +235,7 @@ your problem.
 5. Run `libinput-gestures` in raw mode by repeating the same commands as
    above step but use the `-r` (--raw) switch instead of `-d` (--debug).
    Raw mode does nothing more than echo the raw gesture events received
-   from `libinput-debug-events`. If you see POINTER_* events but no
+   from `libinput debug-events`. If you see POINTER_* events but no
    GESTURE_* events then unfortunately your touchpad and/or libinput
    combination can report simple finger movements but does not report
    multi-finger gestures so `libinput-gestures` will not work. Also note
