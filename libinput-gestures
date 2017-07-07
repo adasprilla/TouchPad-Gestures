@@ -6,7 +6,7 @@ from collections import OrderedDict
 from pathlib import Path
 from distutils.version import LooseVersion as Version
 
-PROG = Path(sys.argv[0]).name
+PROG = Path(sys.argv[0]).stem
 
 # Conf file containing gesture commands.
 # Search first for user file then system file.
