@@ -398,6 +398,14 @@ def unexpanduser(cfile):
 
     return ('~/' + str(relhome)) if relhome else str(relslash)
 
+if args.verbose:
+    xsession = os.getenv('XDG_SESSION_DESKTOP') or \
+            os.getenv('DESKTOP_SESSION') or 'unknown'
+    xtype = os.getenv('XDG_SESSION_TYPE') or 'unknown'
+    print('{}: session {}+{} on {}, python {}, libinput {}'.format(PROG,
+        xsession, xtype, platform.platform(), platform.python_version(),
+        libvers))
+
 # Search for configuration file. Use file given as command line
 # argument, else look for file in search dir order.
 if args.conffile:
@@ -418,6 +426,10 @@ confname = unexpanduser(conffile)
 
 # Read and process the conf file
 get_conf(conffile)
+
+if args.verbose:
+    print('{}: using {} with {} gestures'.format(PROG,
+        confname, sum([len(h.motions) for h in handlers.values()])))
 
 # Just list out available gestures if that is asked for
 if args.list:
@@ -443,16 +455,6 @@ if args.verbose:
             device.get('device')))
     else:
         print('{}: monitoring all devices'.format(PROG))
-
-    xsession = os.getenv('XDG_SESSION_DESKTOP') or \
-            os.getenv('DESKTOP_SESSION') or 'unknown'
-    xtype = os.getenv('XDG_SESSION_TYPE') or 'unknown'
-    print('{}: session {}+{} on {}, python {}, libinput {}'.format(PROG,
-        xsession, xtype, platform.platform(), platform.python_version(),
-        libvers))
-
-    print('{}: using {} with {} gestures'.format(PROG,
-        confname, sum([len(h.motions) for h in handlers.values()])))
 
 # If just called to list out above environment info then exit now
 if args.env:
