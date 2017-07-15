@@ -40,7 +40,7 @@ opt.add_argument('-l', '--list', action='store_true',
 opt.add_argument('-e', '--env', action='store_true',
         help='just list out environment for diagnostic purposes')
 opt.add_argument('--device',
-        help='explicit device name to use')
+        help='explicit device name to use (or path if starts with /)')
 args = opt.parse_args()
 
 if args.debug or args.raw or args.env:
@@ -111,9 +111,19 @@ def get_device(name):
         return None
 
     # If a specific device name was asked for then return that device
+    # This is the "Device" name from libinput list-devices command.
     if name:
+        kdev = str(Path(name).resolve()) if name[0] == '/' else None
         for d in devices:
-            if d.get('device') == name:
+            # Can specify the explicit kernel device path if you want,
+            # but since this path can change through reboots this is
+            # only useful for on-the-fly testing/debug. Or can be a
+            # symlink, e.g. may be determined and set externally before
+            # this program starts.
+            if kdev:
+                if d.get('kernel') == kdev:
+                    return d
+            elif d.get('device') == name:
                 return d
         return None
 
