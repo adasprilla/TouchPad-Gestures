@@ -115,11 +115,11 @@ def get_device(name):
     if name:
         kdev = str(Path(name).resolve()) if name[0] == '/' else None
         for d in devices:
-            # Can specify the explicit kernel device path if you want,
-            # but since this path can change through reboots this is
-            # only useful for on-the-fly testing/debug. Or can be a
-            # symlink, e.g. may be determined and set externally before
-            # this program starts.
+            # If the device name starts with a '/' then it is instead
+            # considered as the explicit device path although since
+            # device paths can change through reboots this is best to be
+            # a symlink. E.g. use the corresponding full path link under
+            # /dev/input/by-path/*.
             if kdev:
                 if d.get('kernel') == kdev:
                     return d
