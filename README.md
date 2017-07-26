@@ -251,6 +251,9 @@ your problem.
    Also paste the output from steps 3 and 4 above.
    If appropriate, paste the output of `libinput-gestures -l` to
    show what gestures you have configured.
+   If your device is not being recognised by `libinput-gestures` at all,
+   paste the output of `libinput list-devices` (`libinput-list-devices`
+   on libinput < v1.8).
 
 ### LICENSE
 
