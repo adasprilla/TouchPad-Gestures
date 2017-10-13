@@ -115,6 +115,14 @@ swipe up/down/left/right gestures, and your 2 or 3 finger pinch
 in/out gestures. Some touchpads can also support 4 finger gestures.
 If you have problems then follow the TROUBLESHOOTING steps below.
 
+NOTE: For efficiency and because most don't need it, `libinput-gestures`
+does not run the configured command under a shell so command
+substitutions and expansions etc will not be parsed. However, just add
+your commands in an executable personal script, e.g.
+`~/bin/libinput-gestures.sh`. Run that by hand until you get it working
+then configure that script name as your command in your
+`libinput-gestures.conf`.
+
 ### STARTING AND STOPPING
 
 Search for, and then start, the libinput-gestures app in your DE or
