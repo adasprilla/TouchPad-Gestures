@@ -129,7 +129,7 @@ def get_device(name):
 
     # Otherwise look for 1st device with touchpad capabilities
     for d in devices:
-        if 'size' in d and d.get('capabilities') == 'pointer':
+        if 'size' in d and 'pointer' in d.get('capabilities'):
             return d
 
     # Otherwise look for 1st device with touchpad in it's name
