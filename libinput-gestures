@@ -405,7 +405,7 @@ def unexpanduser(cfile):
     relslash = cfile.resolve()
     try:
         relhome = relslash.relative_to(os.getenv('HOME'))
-    except:
+    except ValueError:
         relhome = None
 
     return ('~/' + str(relhome)) if relhome else str(relslash)
@@ -519,9 +519,10 @@ for line in cmd.stdout:
                     file=sys.stderr)
     elif event == 'END':
         # Ignore gesture if final action is cancelled
-        if handler and params != 'cancelled':
-            handler.end()
-        handler = None
+        if handler:
+            if params != 'cancelled':
+                handler.end()
+            handler = None
     else:
         print('Unknown gesture + event received: {} + {}.'.format(gesture,
             event), file=sys.stderr)
