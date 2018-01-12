@@ -61,7 +61,7 @@ Install this software:
 
     git clone http://github.com/bulletmark/libinput-gestures
     cd libinput-gestures
-    sudo ./libinput-gestures-setup install
+    sudo make install (or sudo ./libinput-gestures-setup install)
 
 ### CONFIGURATION
 
@@ -156,7 +156,7 @@ You can check the status of the app with:
 
     # cd to source dir, as above
     git pull
-    sudo ./libinput-gestures-setup install
+    sudo make install (or sudo ./libinput-gestures-setup install)
     libinput-gestures-setup restart
 
 ### REMOVAL
