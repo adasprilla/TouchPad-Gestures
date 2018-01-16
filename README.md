@@ -24,7 +24,7 @@ KDE](http://www.lorenzobettini.it/2017/02/touchpad-gestures-in-linux-kde-with-li
 I am not sure how well this will work on all distros and DE's etc.
 
 The latest version and documentation is available at
-http://github.com/bulletmark/libinput-gestures.
+https://github.com/bulletmark/libinput-gestures.
 
 ### INSTALLATION
 
@@ -274,10 +274,10 @@ version.
 This program is distributed in the hope that it will be useful, but
 WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
-Public License at <http://www.gnu.org/licenses/> for more details.
+Public License at <https://www.gnu.org/licenses/> for more details.
 
 [REPO]: https://github.com/bulletmark/libinput-gestures/
 [AUR]: https://aur.archlinux.org/packages/libinput-gestures/
-[XDOTOOL]: http://www.semicomplete.com/projects/xdotool/
+[XDOTOOL]: https://www.semicomplete.com/projects/xdotool/
 
 <!-- vim: se ai syn=markdown: -->
