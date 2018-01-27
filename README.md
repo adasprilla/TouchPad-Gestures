@@ -199,9 +199,12 @@ Note that GNOME on Wayland natively implements the following gestures:
 - 3 finger pinch opens/close the GNOME overview.
 - 4 finger swipe up/down changes workspaces.
 
-So if you choose to run `libinput-gestures` on Wayland to get extra
-gestures, be sure to disable the default `libinput-gestures.conf` pinch
-gestures, and 4 finger swipe up/down.
+So if you choose to run `libinput-gestures` on Wayland, be sure to
+change or disable the your `libinput-gestures.conf` pinch and swipe
+up/down gestures to not clash with these. E.g, configure your
+`libinput-gestures.conf` pinch gestures for only 2 fingers, and the
+swipe up/down for only 3 fingers so they work independently of the
+native gestures.
 
 GNOME on Xorg does not natively implement any gestures.
 
