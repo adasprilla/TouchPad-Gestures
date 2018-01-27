@@ -123,15 +123,15 @@ add your commands in an executable personal script, e.g.
 then configure that script name as your command in your
 `libinput-gestures.conf`.
 
-In most cases, libinput-gestures automatically determines your touchpad
-device. However, you can specify it in your configuration file if
-needed. If you have multiple touchpads you can also specify
-libinput-gestures to use all devices. See the notes in the default
+In most cases, `libinput-gestures` automatically determines your
+touchpad device. However, you can specify it in your configuration file
+if needed. If you have multiple touchpads you can also specify
+`libinput-gestures` to use all devices. See the notes in the default
 `libinput-gestures.conf` file about the `device` configuration command.
 
 ### STARTING AND STOPPING
 
-Search for, and then start, the libinput-gestures app in your DE or
+Search for, and then start, the `libinput-gestures` app in your DE or
 you can start it immediately in the background using the command line
 utility:
 
@@ -194,13 +194,16 @@ so, for example, page forward/back swipe gestures do work for Firefox
 and Chrome browsers when running on Wayland as per the default
 configuration.
 
-Note if your touchpad is capable of reporting 4 finger gestures and you
-are using GNOME on Wayland then you can already switch workspaces using
-4 finger swipe up and down gestures natively provided by GNOME. That is
-the only desktop touchpad gesture GNOME currently provides. In that
-case, if you still choose to run `libinput-gestures` to get extra
-gestures, be sure to disable the default `libinput-gestures` swipe
-up/down, or at least configure swipe up/down only for 3 fingers.
+Note that GNOME on Wayland natively implements the following gestures:
+
+- 3 finger pinch opens/close the GNOME overview.
+- 4 finger swipe up/down changes workspaces.
+
+So if you choose to run `libinput-gestures` on Wayland to get extra
+gestures, be sure to disable the default `libinput-gestures.conf` pinch
+gestures, and 4 finger swipe up/down.
+
+GNOME on Xorg does not natively implement any gestures.
 
 ### EXTENDED GESTURES
 
