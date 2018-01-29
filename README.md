@@ -219,8 +219,8 @@ examples in `libinput-gestures.conf`.
 - swipe left_up (e.g. jump to previous open browser tab)
 - swipe left_down (e.g. close current browser tab)
 - swipe right_down (e.g. reopen and jump to last closed browser tab)
-- swipe pinch clockwise
-- swipe pinch anticlockwise
+- pinch clockwise
+- pinch anticlockwise
 
 So instead of just configuring swipe up/down and left/right each at 90
 degrees, you can add the above extra 4 swipes for 45 degree swipes to
