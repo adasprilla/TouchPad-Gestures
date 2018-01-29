@@ -222,11 +222,11 @@ examples in `libinput-gestures.conf`.
 - pinch clockwise
 - pinch anticlockwise
 
-So instead of just configuring swipe up/down and left/right each at 90
-degrees, you can add the above extra 4 swipes for 45 degree swipes to
-give a total of 8 swipe gestures over 360 degrees. It works better than
-you may expect, at least after some practice. It means you can
-completely manage browser tabs from your touchpad.
+So instead of just configuring the usual swipe up/down and left/right
+each at 90 degrees separation, you can add the above extra 4 swipes to
+give a total of 8 swipe gestures each at 45 degrees separation. It works
+better than you may expect, at least after some practice. It means you
+can completely manage browser tabs from your touchpad.
 
 ### TROUBLESHOOTING
 
