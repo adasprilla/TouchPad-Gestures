@@ -11,7 +11,7 @@ PROG = Path(sys.argv[0]).stem
 # Conf file containing gesture commands.
 # Search first for user file then system file.
 CONFNAME = '{}.conf'.format(PROG)
-USERDIR = os.getenv('XDG_CONFIG_DIR', os.path.expanduser('~/.config'))
+USERDIR = os.getenv('XDG_CONFIG_HOME', os.path.expanduser('~/.config'))
 CONFDIRS = (USERDIR, '/etc')
 
 # Ratio of X/Y (or Y/X) at which we consider an oblique swipe gesture.
