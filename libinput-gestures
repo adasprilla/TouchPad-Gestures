@@ -18,8 +18,13 @@ CONFDIRS = (USERDIR, '/etc')
 # The number is the trigger angle in degrees.
 OBLIQUE_RATIO = math.tan(math.radians(22.5))
 
-# Minimum significant distance to move for swipes, in dots squared.
-ABZSQUARE = 70**2
+# Minimum significant distance to move for swipes, in dots.
+MINABZ = 50
+
+# Reference number of dots movement for full swipe
+base_width = 1200
+base_height = None
+base_diag = None
 
 # Rotation threshold in degrees to discriminate pinch rotate from in/out
 ROTATE_ANGLE = 15.0
@@ -140,10 +145,53 @@ def get_device(name):
     # Give up
     return None
 
+class SCALE:
+    'Handle scaled arguments in commands'
+    count = 0
+
+    def __init__(self, index, match):
+        SCALE.count += 1
+        self.index = index
+        start = match.group(2)
+        end = match.group(3)
+        self.argstart = match.group(1)
+        self.argend = match.group(4)
+        self.start = float(start)
+        self.end = float(end)
+        self.round = 2
+        self.scale = self.end - self.start
+        if '.' not in start and '.' not in end:
+            self.start = int(round(self.start))
+            self.end = int(round(self.end))
+            self.round = 0
+
+    def set(self, scaleval):
+        'Update this scaled argument'
+        val = round(min(self.start + scaleval * self.scale, self.end),
+                self.round)
+        return self.argstart + str(val if self.round else int(val)) + \
+                self.argend
+
+    @classmethod
+    def check(cls, index, arg):
+        'Check for scaled argument at this index'
+        match = re.match(r'^(.*)@SCALE_([.\d]+?)_([.\d]+?)@(.*)$', arg)
+        return cls(index, match) if match else None
+
 class COMMAND:
     'Generic command handler'
-    def __init__(self, args):
-        self.argslist = args
+    def __init__(self, cmdstr):
+        self.scales = []
+        self.argslist = shlex.split(cmdstr)
+        for index, arg in enumerate(self.argslist):
+            scale = SCALE.check(index, arg)
+            if scale:
+                self.scales.append(scale)
+
+    def set_scale(self, scaleval):
+        'Set the command based on the size of the scale, if applicable'
+        for scale in self.scales:
+            self.argslist[scale.index] = scale.set(scaleval)
 
     def run(self):
         'Run this command + arguments'
@@ -163,17 +211,19 @@ def add_internal_command(cls):
 @add_internal_command
 class COMMAND_internal(COMMAND):
     'Internal command handler.'
-    def __init__(self, args):
+    def __init__(self, *args, **kwargs):
         'Action internal swipe commands'
-        super().__init__(args)
+        super().__init__(*args, **kwargs)
 
         # Commands currently supported are:
         commands = (
             'ws_up',
             'ws_down',
         )
+
         # Set up command line arguments
-        opt = argparse.ArgumentParser(prog=args[0], description=self.__doc__)
+        opt = argparse.ArgumentParser(prog=self.argslist[0],
+                description=self.__doc__)
         opt.add_argument('-w', '--wrap', action='store_true',
                 help='Wrap workspaces when switching to/from start/end')
         opt.add_argument('--row', type=int,
@@ -182,7 +232,7 @@ class COMMAND_internal(COMMAND):
                 help='Step along the column for this number in a column')
         opt.add_argument('action', choices=commands,
                 help='Internal command to action')
-        self.args = opt.parse_args(args[1:])
+        self.args = opt.parse_args(self.argslist[1:])
         self.is_up = self.args.action == commands[0]
 
     def run(self):
@@ -252,9 +302,9 @@ class GESTURE:
             self.has_extended = True
 
         key = (motion, fingers) if fingers else motion
-        cmds = shlex.split(command)
-        cls = internal_commands.get(cmds[0], COMMAND)
-        self.motions[key] = cls(cmds)
+        cmd, *arglist = command.split()
+        cls = internal_commands.get(cmd, COMMAND)
+        self.motions[key] = cls(command)
         return None
 
     def begin(self, fingers):
@@ -262,19 +312,22 @@ class GESTURE:
         self.fingers = fingers
         self.data = [0.0, 0.0]
 
-    def action(self, motion):
+    def action(self, motion, scale):
         'Action a motion command for this gesture'
         command = self.motions.get((motion, self.fingers)) or \
                 self.motions.get(motion)
 
+        if command:
+            command.set_scale(scale)
+            if not args.debug:
+                command.run()
+
         if args.verbose:
-            print('{}: {} {} {} {}'.format(PROG, self.name, motion,
-                self.fingers, self.data))
+            self.data = [round(d, 2) for d in self.data]
+            print('{}: {} {} {} {} {}'.format(PROG, self.name, motion,
+                self.fingers, self.data, round(scale, 2)))
             if command:
                 print('  ', command)
-
-        if command and not args.debug:
-            command.run()
 
 @add_gesture_handler
 class SWIPE(GESTURE):
@@ -295,7 +348,8 @@ class SWIPE(GESTURE):
         aby = abs(y)
 
         # Require absolute distance movement beyond a small thresh-hold.
-        if abx**2 + aby**2 < ABZSQUARE:
+        abz = math.sqrt(abx**2 + aby**2)
+        if abz < MINABZ:
             return
 
         # Discriminate left/right or up/down.
@@ -305,12 +359,18 @@ class SWIPE(GESTURE):
             motion = 'left' if x < 0 else 'right'
             if self.has_extended and aby / abx > OBLIQUE_RATIO:
                 motion += ('_up' if y < 0 else '_down')
+                scale = base_diag
+            else:
+                scale = base_width
         else:
             motion = 'up' if y < 0 else 'down'
             if self.has_extended and abx / aby > OBLIQUE_RATIO:
                 motion = ('left_' if x < 0 else 'right_') + motion
+                scale = base_diag
+            else:
+                scale = base_height
 
-        self.action(motion)
+        self.action(motion, (abz - MINABZ) / scale)
 
 @add_gesture_handler
 class PINCH(GESTURE):
@@ -326,11 +386,13 @@ class PINCH(GESTURE):
     def end(self):
         'Action this gesture at the end of a motion sequence'
         ratio, angle = self.data
+        absratio = abs(ratio)
 
         if self.has_extended and abs(angle) > ROTATE_ANGLE:
-            self.action('clockwise' if angle >= 0.0 else 'anticlockwise')
+            self.action('clockwise' if angle >= 0.0 else
+                    'anticlockwise', absratio)
         elif ratio != 0.0:
-            self.action('in' if ratio <= 0.0 else 'out')
+            self.action('in' if ratio <= 0.0 else 'out', absratio)
 
 # Table of configuration commands
 conf_commands = OrderedDict()
@@ -368,12 +430,31 @@ def conf_gesture(lineargs):
 
 @add_conf_command
 def conf_device(lineargs):
-    'Process a single device line in conf file'
+    'Process device line in conf file'
     # Command line overrides configuration file
     if not args.device:
         args.device = lineargs
 
     return None if args.device else 'No device specified'
+
+@add_conf_command
+def conf_resolution(lineargs):
+    'Process resolution line in conf file'
+    global base_width, base_height
+    args = lineargs.lower()
+    if 'x' in args:
+        width, height = args.split('x', maxsplit=1)
+        try:
+            base_height = int(height.strip())
+        except ValueError:
+            return 'format is int "width" or "width x height"'
+    else:
+        width = args
+
+    try:
+        base_width = int(width.strip())
+    except ValueError:
+        return 'Width must be integer'
 
 def get_conf_line(line):
     'Process a single line in conf file'
@@ -409,6 +490,22 @@ def unexpanduser(cfile):
         relhome = None
 
     return ('~/' + str(relhome)) if relhome else str(relslash)
+
+def calc_resolution(device):
+    'Calculate touchpad resolution given starting width [and height]'
+    global base_width, base_height, base_diag
+    size = device and device.get('size')
+    match = re.match(r'(\d+)x(\d+)', size if size else '', re.I)
+    # Assume a fallback ratio if we can not work it out
+    if match:
+        ratio = int(match.group(1)) / int(match.group(2))
+    else:
+        ratio = 16 / 9
+
+    if base_height is None:
+        base_height = int(round(base_width / ratio))
+
+    base_diag = int(round(math.sqrt(base_width**2 + base_height**2)))
 
 if args.verbose:
     xsession = os.getenv('XDG_SESSION_DESKTOP') or \
@@ -467,6 +564,11 @@ if args.verbose:
             device.get('device')))
     else:
         print('{}: monitoring all devices'.format(PROG))
+
+calc_resolution(device)
+if SCALE.count > 0 and args.verbose:
+    print('{}: using resolution {}x{} for {} scale substitions'.format(PROG,
+        base_width, base_height, SCALE.count))
 
 # If just called to list out above environment info then exit now
 if args.env:

@@ -228,6 +228,59 @@ give a total of 8 swipe gestures each at 45 degrees separation. It works
 better than you may expect, at least after some practice. It means you
 can completely manage browser tabs from your touchpad.
 
+### SCALED ARGUMENTS IN EXTERNAL COMMANDS
+
+_Note, this is an experimental feature which may be a little awkward to
+use on many current touchpads._
+
+It is possible to set a special template argument in your configured
+external command string to pass a numeric value proportional to the size
+of the gesture executed. An example best explains this feature. Say you
+want to raise or lower the audio volume based on the size of your
+up/down swipes. You can configure the following gestures
+
+    gesture swipe up pactl set-sink-volume 1 +@SCALE_1_100@%
+    gesture swipe down pactl set-sink-volume 1 -@SCALE_1_100@%
+
+At run time, `libinput-gestures` will compute a scaled value between 1
+to 100 based on the size of the swipe gesture relative to your touchpad
+dimensions, and insert that value as that argument in place of the
+@..@ string before calling the external command.
+
+- There can be no spaces in the @SCALE_LOW_HIGH@ template string. You
+  must specify the LOW and HIGH values, delimitered by the 2 underscores.
+- If either the LOW or HIGH number has a decimal point, then a float
+  value will be output. If neither has a decimal point, then an integer
+  number will be output.
+- The output value will always be constrained within LOW and HIGH
+  values, never lower or higher.
+- The scaling is dependent on the assumed resolution of your touchpad.
+  If you find difficulty with this, you can set the resolution
+  explicitly using the `resolution` command in your config file. The
+  argment can be "width x height", or just "width" to let
+  `libinput-gestures` work out the height based on the reported aspect
+  ratio of the touchpad.
+
+As another example, you could also use this feature to repeat commands
+multiple times based on the size of your swipe. E.g, create a script
+`repeat.sh` with contents:
+
+```shell
+#!/bin/bash
+count=$1
+shift
+cmd="$@"
+for (( ; count > 0; --count )); do
+    $cmd
+done
+```
+
+Then configure gestures like the following to jump between tabs. Large
+swipes will jump up to 4 tabs.
+
+    gesture swipe right_up repeat.sh @SCALE_1_4@ xdotool key control+Tab
+    gesture swipe left_up repeat.sh @SCALE_1_4@ xdotool key control+shift+Tab
+
 ### TROUBLESHOOTING
 
 Please don't raise a github issue but provide little information about
