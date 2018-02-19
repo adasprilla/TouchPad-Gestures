@@ -214,7 +214,10 @@ class COMMAND_internal(COMMAND):
     def __init__(self, *args, **kwargs):
         'Action internal swipe commands'
         super().__init__(*args, **kwargs)
+        self.parsed = False
 
+    def parse_args(self):
+        'Parse command arguments'
         # Commands currently supported are:
         commands = (
             'ws_up',
@@ -230,13 +233,19 @@ class COMMAND_internal(COMMAND):
                 help='Step along the row for this number in a row')
         opt.add_argument('--col', type=int,
                 help='Step along the column for this number in a column')
+        opt.add_argument('--count', type=int, default=1,
+                help='Step count')
         opt.add_argument('action', choices=commands,
                 help='Internal command to action')
         self.args = opt.parse_args(self.argslist[1:])
         self.is_up = self.args.action == commands[0]
+        self.parsed = True
 
     def run(self):
         'Get list of current workspaces and select next one'
+        if self.scales or not self.parsed:
+            self.parse_args()
+
         stdout = run(('wmctrl', '-d'), check=False)
         if not stdout:
             # This command can fail on GNOME when you have only a single
@@ -245,22 +254,23 @@ class COMMAND_internal(COMMAND):
             # anyhow.
             return
 
+        args = self.args
         out = stdout.strip().splitlines()
         lines = [l.split(maxsplit=3)[1] for l in out]
         index = lines.index('*')
 
-        if self.args.row:
-            minindex = index - (index % self.args.row)
-            maxindex = minindex + self.args.row
-            count = 1
+        if args.row:
+            minindex = index - (index % args.row)
+            maxindex = minindex + args.row
+            count = args.count
         else:
             minindex = 0
             maxindex = len(lines)
-            count = (maxindex // self.args.col) if self.args.col else 1
+            count = (maxindex // args.col) if args.col else args.count
 
         # Work out desired workspace
         index += count if self.is_up else -count
-        if self.args.wrap:
+        if args.wrap:
             if index == minindex - count:
                 index = maxindex - count
             elif index >= maxindex:
