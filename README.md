@@ -279,7 +279,14 @@ Then configure gestures like the following to jump between tabs. Large
 swipes will jump up to 4 tabs.
 
     gesture swipe right_up repeat.sh @SCALE_1_4@ xdotool key control+Tab
-    gesture swipe left_up repeat.sh @SCALE_1_4@ xdotool key control+shift+Tab
+    gesture swipe left_up  repeat.sh @SCALE_1_4@ xdotool key control+shift+Tab
+
+You can also use this feature with the `_internal` command, e.g. to
+move 1 workspace for small swipes but 2 workspaces for large swipes:
+
+    gesture swipe up   _internal --count @SCALE_1_2@ ws_up
+    gesture swipe down _internal --count @SCALE_1_2@ ws_down
+
 
 ### TROUBLESHOOTING
 
