@@ -287,7 +287,6 @@ move 1 workspace for small swipes but 2 workspaces for large swipes:
     gesture swipe up   _internal --count @SCALE_1_2@ ws_up
     gesture swipe down _internal --count @SCALE_1_2@ ws_down
 
-
 ### TROUBLESHOOTING
 
 Please don't raise a github issue but provide little information about
