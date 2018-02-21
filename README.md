@@ -242,10 +242,10 @@ swipes. You can configure the following gestures
     gesture swipe up   pactl set-sink-volume 1 +@SCALE_1_50@%
     gesture swipe down pactl set-sink-volume 1 -@SCALE_1_50@%
 
-At run time, `libinput-gestures` will compute a scaled value between 1
-to 50% based on the size of the swipe gesture relative to your touchpad
-dimensions, and insert that value as that argument in place of the @..@
-string before calling the command.
+At the end of your gesture, `libinput-gestures` will compute a scaled
+value between 1 to 50 based on the size of your swipe relative to your
+touchpad dimensions, and insert that value as that % argument in place
+of the @..@ string when calling the command.
 
 - There can be no spaces in the @SCALE_LOW_HIGH@ template string. You
   must specify the LOW and HIGH values, delimitered by the 2 underscores.
