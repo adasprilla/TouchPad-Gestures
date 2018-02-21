@@ -239,11 +239,11 @@ gesture executed. An example best explains this feature. Say you want to
 raise or lower the audio volume based on the size of your up/down
 swipes. You can configure the following gestures
 
-    gesture swipe up   pactl set-sink-volume 1 +@SCALE_1_100@%
-    gesture swipe down pactl set-sink-volume 1 -@SCALE_1_100@%
+    gesture swipe up   pactl set-sink-volume 1 +@SCALE_1_50@%
+    gesture swipe down pactl set-sink-volume 1 -@SCALE_1_50@%
 
 At run time, `libinput-gestures` will compute a scaled value between 1
-to 100 based on the size of the swipe gesture relative to your touchpad
+to 50% based on the size of the swipe gesture relative to your touchpad
 dimensions, and insert that value as that argument in place of the @..@
 string before calling the command.
 
