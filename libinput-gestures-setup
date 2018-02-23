@@ -11,6 +11,8 @@ ICOBAS="/usr/share/icons/hicolor"
 ICODIR="$ICOBAS/128x128/apps"
 OCODIR="/usr/share/pixmaps"
 DOCDIR="/usr/share/doc/$NAME"
+MSCDIR="/usr/share/$NAME"
+SCRDIR="$MSCDIR/scripts"
 CNFDIR="/etc"
 HCFDIR="${XDG_CONFIG_HOME:-$HOME/.config}"
 AUTDIR="$HCFDIR/autostart"
@@ -153,6 +155,7 @@ if [ $cmd = "install" -o $cmd = "uninstall" ]; then
     if [ $cmd = "install" ]; then
 	install -CDv -m 755 -t $DESTDIR$BINDIR $NAME-setup
 	install -CDv -m 755 -t $DESTDIR$BINDIR $NAME
+	install -CDv -m 755 -t $DESTDIR$SCRDIR scripts/*
 	install -CDv -m 644 -t $DESTDIR$APPDIR $NAME.desktop
 	install -CDv -m 644 -t $DESTDIR$ICODIR $NAME.png
 	install -CDv -m 644 -t $DESTDIR$CNFDIR $NAME.conf
@@ -167,6 +170,7 @@ if [ $cmd = "install" -o $cmd = "uninstall" ]; then
 	rm -rfv $DESTDIR$APPDIR/$NAME.desktop
 	rm -rfv $DESTDIR$ICODIR/$NAME.png
 	rm -rfv $DESTDIR$CNFDIR/$NAME.conf
+	rm -rfv $DESTDIR$MSCDIR
 	rm -rfv $DESTDIR$DOCDIR
 	rm -rfv $DESTDIR$BINDIR/$NAME-setup
     fi

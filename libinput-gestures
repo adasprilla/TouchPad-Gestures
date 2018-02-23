@@ -175,7 +175,7 @@ class SCALE:
     @classmethod
     def check(cls, index, arg):
         'Check for scaled argument at this index'
-        match = re.match(r'^(.*)@SCALE_([.\d]+?)_([.\d]+?)@(.*)$', arg)
+        match = re.match(r'^(.*)#SCALE_([.\d]+?)_([.\d]+?)#(.*)$', arg)
         return cls(index, match) if match else None
 
 class COMMAND:
@@ -457,7 +457,7 @@ def conf_resolution(lineargs):
         try:
             base_height = int(height.strip())
         except ValueError:
-            return 'format is int "width" or "width x height"'
+            return 'Format is int "width" or "width x height"'
     else:
         width = args
 

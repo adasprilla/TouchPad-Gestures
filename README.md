@@ -239,20 +239,21 @@ gesture executed. An example best explains this feature. Say you want to
 raise or lower the audio volume based on the size of your up/down
 swipes. You can configure the following gestures
 
-    gesture swipe up   pactl set-sink-volume 1 +@SCALE_1_50@%
-    gesture swipe down pactl set-sink-volume 1 -@SCALE_1_50@%
+    gesture swipe up   amixer -q set Master #SCALE_1_50#%+
+    gesture swipe down amixer -q set Master #SCALE_1_50#%-
 
 At the end of your gesture, `libinput-gestures` will compute a scaled
 value between 1 to 50 based on the size of your swipe relative to your
 touchpad dimensions, and insert that value as that % argument in place
-of the @..@ string when calling the command.
+of the `#..#` string when calling the command.
 
-- There can be no spaces in the @SCALE_LOW_HIGH@ template string. You
-  must specify the LOW and HIGH values, delimitered by the 2 underscores.
-- If either the LOW or HIGH number has a decimal point, then a float
+- There can be no spaces in the `#SCALE_LOW_HIGH#` template string. You
+  must specify the `LOW` and `HIGH` values, delimitered by the 2
+  underscores.
+- If either the `LOW` or `HIGH` number has a decimal point, then a float
   value will be output. If neither has a decimal point, then an integer
   number will be output.
-- The output value will always be constrained within LOW and HIGH
+- The output value will always be constrained within `LOW` and `HIGH`
   values, never lower or higher.
 - The scaling is dependent on the assumed resolution of your touchpad.
   If you find difficulty with this, you can set the resolution
@@ -261,31 +262,26 @@ of the @..@ string when calling the command.
   `libinput-gestures` work out the height based on the reported aspect
   ratio of the touchpad.
 
-You can also use this feature with the `_internal` command, e.g. to
+You can also use this feature with the `_internal` command. E.g. to
 move 1 workspace for small swipes but 2 workspaces for large swipes:
 
-    gesture swipe up   _internal --count @SCALE_1_2@ ws_up
-    gesture swipe down _internal --count @SCALE_1_2@ ws_down
+    gesture swipe up   _internal --count #SCALE_1_2# ws_up
+    gesture swipe down _internal --count #SCALE_1_2# ws_down
 
 As another example, you could also use this feature to repeat commands
-multiple times based on the size of your swipe. E.g, create a script
-`repeat.sh` somewhere on your `PATH` with contents:
+multiple times based on the size of your swipe. E.g, use the utility
+script installed with `libinput-gestures` and configure gestures like
+the following to jump between tabs. Large swipes will jump up to 4 tabs.
 
-```shell
-#!/bin/bash
-count=$1
-shift
-cmd="$@"
-for (( ; count > 0; --count )); do
-    $cmd
-done
-```
+    gesture swipe right_up /use/share/libinput-gestures/scripts/repeat-cmd #SCALE_1_4# xdotool key control+Tab
+    gesture swipe left_up  /use/share/libinput-gestures/scripts/repeat-cmd #SCALE_1_4# xdotool key control+shift+Tab
 
-Then configure gestures like the following to jump between tabs. Large
-swipes will jump up to 4 tabs.
+As a more comprehensive example for volume control, use the utility
+script installed with `libinput-gestures` to also output a notification
+of the volume settings.
 
-    gesture swipe right_up repeat.sh @SCALE_1_4@ xdotool key control+Tab
-    gesture swipe left_up  repeat.sh @SCALE_1_4@ xdotool key control+shift+Tab
+    gesture swipe up   /usr/share/libinput-gestures/scripts/set-volume #SCALE_1_50#%+
+    gesture swipe down /usr/share/libinput-gestures/scripts/set-volume #SCALE_1_50#%-
 
 ### TROUBLESHOOTING
 
