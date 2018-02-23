@@ -230,8 +230,8 @@ can completely manage browser tabs from your touchpad.
 
 ### SCALED ARGUMENTS IN COMMANDS
 
-_Note, this is an experimental feature which may be a little awkward to
-use on many current touchpads._
+_Note, this is an experimental feature with limited utility and which
+may be a little awkward to use on many current touchpads._
 
 It is possible to set a special template argument in your configured
 command string to pass a numeric value proportional to the size of the
