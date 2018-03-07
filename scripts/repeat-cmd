@@ -1,8 +1,8 @@
 #!/bin/bash
 # Script to repeat given command by the number of times given as first arg.
+# Mark Blakeney, Mar 2018.
 count=$1
 shift
-cmd="$@"
 for (( ; count > 0; --count )); do
-    $cmd
+    "$@"
 done

@@ -1,11 +1,12 @@
 #!/bin/bash
 # Script to set volume by given value percentage
+# Mark Blakeney, Mar 2018.
 
 getvol() {
-    sed -n "/$1/s/^.*$1.*\[\([0-9]*\)%\].*$/\1/p"
+    sed -n "/$1/s/^.*$1.*\\[\\([0-9]*\\)%\\].*$/\\1/p"
 }
 
-stat=$(amixer set Master $1)
-L=$(echo $stat | getvol Left:)
-R=$(echo $stat | getvol Right:)
-notify-send -u low -t 500 -a libinput-gestures Volume "Left: $L%\tRight: $R%"
+stat=$(amixer set Master "$1")
+L=$(echo "$stat" | getvol Left:)
+R=$(echo "$stat" | getvol Right:)
+notify-send -u low -t 500 -a libinput-gestures Volume "Left: $L%\\tRight: $R%"
