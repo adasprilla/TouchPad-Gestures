@@ -76,10 +76,14 @@ def get_libinput_vers():
     # Try to use newer libinput interface then fall back to old
     # (depreciated) interface.
     res = run(('libinput', '--version'), check=False)
-    return res.strip() if res else run(('libinput-list-devices', '--version'))
+    return res.strip() if res else \
+            run(('libinput-list-devices', '--version'), check=False)
 
 # Libinput changed the way in which it's utilities are called
 libvers = get_libinput_vers()
+if not libvers:
+    sys.exit('libinput helper tools do not seem to be installed?')
+
 if Version(libvers) >= Version('1.8'):
     cmd_debug_events = 'libinput debug-events'
     cmd_list_devices = 'libinput list-devices'
