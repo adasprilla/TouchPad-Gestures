@@ -177,7 +177,8 @@ class COMMAND_internal(COMMAND):
             'ws_down',
         )
         # Set up command line arguments
-        opt = argparse.ArgumentParser(prog=args[0], description=self.__doc__)
+        opt = argparse.ArgumentParser(prog=self.argslist[0],
+                description=self.__doc__)
         opt.add_argument('-w', '--wrap', action='store_true',
                 help='Wrap workspaces when switching to/from start/end')
         opt.add_argument('--row', type=int,
@@ -186,7 +187,7 @@ class COMMAND_internal(COMMAND):
                 help='Step along the column for this number in a column')
         opt.add_argument('action', choices=commands,
                 help='Internal command to action')
-        self.args = opt.parse_args(args[1:])
+        self.args = opt.parse_args(self.argslist[1:])
         self.is_up = self.args.action == commands[0]
 
     def run(self):
@@ -199,22 +200,23 @@ class COMMAND_internal(COMMAND):
             # anyhow.
             return
 
+        args = self.args
         out = stdout.strip().splitlines()
         lines = [l.split(maxsplit=3)[1] for l in out]
         index = lines.index('*')
 
-        if self.args.row:
-            minindex = index - (index % self.args.row)
-            maxindex = minindex + self.args.row
+        if args.row:
+            minindex = index - (index % args.row)
+            maxindex = minindex + args.row
             count = 1
         else:
             minindex = 0
             maxindex = len(lines)
-            count = (maxindex // self.args.col) if self.args.col else 1
+            count = (maxindex // args.col) if args.col else 1
 
         # Work out desired workspace
         index += count if self.is_up else -count
-        if self.args.wrap:
+        if args.wrap:
             if index == minindex - count:
                 index = maxindex - count
             elif index >= maxindex:
