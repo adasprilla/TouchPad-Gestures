@@ -93,7 +93,7 @@ auto_start() {
 user_action() {
     local cmd=$1
 
-    if [[ $cmd == "start" ]]; then
+    if [[ $cmd == start ]]; then
 	if [[ ! -f $APPDIR/$NAME.desktop ]]; then
 	    echo "$NAME is not installed."
 	    exit 1
@@ -101,20 +101,20 @@ user_action() {
 	if launch "$NAME"; then
 	    echo "$NAME started."
 	fi
-    elif [[ $cmd == "stop" ]]; then
+    elif [[ $cmd == stop ]]; then
 	for prog in libinput-debug-events $NAME; do
 	    if pkill -u $USER -f "$prog\$|$prog " &>/dev/null; then
 		echo "$prog stopped."
 	    fi
 	done
-    elif [[ $cmd == "autostart" ]]; then
+    elif [[ $cmd == autostart ]]; then
 	if ! auto_start; then
 	    echo "$NAME is not installed."
 	    exit 1
 	fi
-    elif [[ $cmd == "autostop" ]]; then
+    elif [[ $cmd == autostop ]]; then
 	rm -fv $AUTDIR/$NAME.desktop
-    elif [[ $cmd == "status" ]]; then
+    elif [[ $cmd == status ]]; then
 	if [[ -f $APPDIR/$NAME.desktop ]]; then
 	    echo "$NAME is installed."
 	else
@@ -140,9 +140,9 @@ user_action() {
     fi
 }
 
-if [[ $cmd == "install" || $cmd == "uninstall" ]]; then
+if [[ $cmd == install || $cmd == uninstall ]]; then
     DESTDIR="${DESTDIR%%+(/)}"
-    if [[ -z "$DESTDIR" && "$(id -un)" != "root" ]]; then
+    if [[ -z $DESTDIR && $(id -un) != root ]]; then
 	echo "Install or uninstall must be run as sudo/root."
 	exit 1
     fi
@@ -150,7 +150,7 @@ if [[ $cmd == "install" || $cmd == "uninstall" ]]; then
     # Remove any old files from earlier versions of program
     rm -f $DESTDIR$OCODIR/$NAME.png
 
-    if [[ $cmd == "install" ]]; then
+    if [[ $cmd == install ]]; then
 	install -CDv -m 755 -t $DESTDIR$BINDIR $NAME-setup
 	install -CDv -m 755 -t $DESTDIR$BINDIR $NAME
 	install -CDv -m 644 -t $DESTDIR$APPDIR $NAME.desktop
@@ -171,7 +171,7 @@ if [[ $cmd == "install" || $cmd == "uninstall" ]]; then
 	rm -rfv $DESTDIR$BINDIR/$NAME-setup
     fi
 
-    if [[ -z "$DESTDIR" ]]; then
+    if [[ -z $DESTDIR ]]; then
 	if [[ -x /usr/bin/update-desktop-database ]]; then
 	    /usr/bin/update-desktop-database -q
 	fi
@@ -180,7 +180,7 @@ if [[ $cmd == "install" || $cmd == "uninstall" ]]; then
 	fi
     fi
 else
-    if [[ "$(id -un)" == "root" ]]; then
+    if [[ $(id -un) == root ]]; then
 	echo "Non-installation commands must be run as your own user."
 	exit 1
     fi
@@ -202,7 +202,7 @@ else
 	auto_start
     fi
 
-    if [[ $cmd == "restart" ]]; then
+    if [[ $cmd == restart ]]; then
 	user_action "stop"
 	user_action "start"
     else
