@@ -275,6 +275,14 @@ your problem.
    paste the output of `libinput list-devices` (`libinput-list-devices`
    on libinput < v1.8).
 
+8. Be sure that a configured external command works exactly how you want
+   when you run it directly on the command line **before** you configure
+   it for `libinput-gestures`. E.g. run `xdotool` manually and
+   experiment with various arguments to work out exactly what arguments
+   it requires to do what you want, and only then add that command +
+   arguments to your custom configuration in
+   `~/.config/libinput-gestures.conf`.
+
 ### LICENSE
 
 Copyright (C) 2015 Mark Blakeney. This program is distributed under the
