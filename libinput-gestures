@@ -490,7 +490,7 @@ devstr = ' --device {}'.format(device.get('kernel')) if device else ''
 command = 'stdbuf -oL -- {}{}'.format(cmd_debug_events, devstr)
 
 cmd = subprocess.Popen(shlex.split(command), stdout=subprocess.PIPE,
-        bufsize=0, universal_newlines=True)
+        bufsize=1, universal_newlines=True)
 
 # Sit in a loop forever reading the libinput messages ..
 handler = None
