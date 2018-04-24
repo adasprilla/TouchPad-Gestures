@@ -68,8 +68,8 @@ Install this software:
 Many users will be happy with the default configuration in which case
 you can just type the following and you are ready to go:
 
-    libinput-gestures-setup start
     libinput-gestures-setup autostart
+    libinput-gestures-setup start
 
 Otherwise, if you want to create your own custom gestures etc, keep
 reading ..
@@ -231,7 +231,8 @@ can completely manage browser tabs from your touchpad.
 ### TROUBLESHOOTING
 
 Please don't raise a github issue but provide little information about
-your problem.
+your problem, and please don't raise an issue until you have considered all
+the following steps.
 
 1. Ensure you are running the latest version from the
    [libinput-gestures github repository][REPO] or from the [Arch AUR][AUR].
@@ -252,36 +253,38 @@ your problem.
 	libinput-gestures -d
 	(<ctrl-c> to stop)
    ````
+
 5. Run `libinput-gestures` in raw mode by repeating the same commands as
-   above step but use the `-r` (--raw) switch instead of `-d` (--debug).
-   Raw mode does nothing more than echo the raw gesture events received
-   from `libinput debug-events`. If you see POINTER_* events but no
-   GESTURE_* events then unfortunately your touchpad and/or libinput
-   combination can report simple finger movements but does not report
-   multi-finger gestures so `libinput-gestures` will not work. Also note
-   that discrimination of SWIPE and PINCH gestures is done completely
-   within libinput.
+   above step but use the `-r` (`--raw`) switch instead of `-d`
+   (`--debug`). Raw mode does nothing more than echo the raw gesture
+   events received from `libinput debug-events`. If you see `POINTER_*`
+   events but no `GESTURE_*` events then unfortunately your touchpad
+   and/or libinput combination can report simple finger movements but
+   does not report multi-finger gestures so `libinput-gestures` will not
+   work. Also note that discrimination of `SWIPE` and `PINCH` gestures
+   is done completely within libinput, before they get to
+   `libinput-gestures`.
 
 6. Search the web for Linux kernel and/or libinput issues relating to
    your specific touchpad device and/or laptop/pc. Update your BIOS if
    possible.
 
-7. If you raise an issue, **always** include the output of
-   `libinput-gestures -e` to show the environment you are using.
-   Also paste the output from steps 4 and 5 above.
-   If appropriate, paste the output of `libinput-gestures -l` to
-   show what gestures you have configured.
-   If your device is not being recognised by `libinput-gestures` at all,
-   paste the output of `libinput list-devices` (`libinput-list-devices`
-   on libinput < v1.8).
-
-8. Be sure that a configured external command works exactly how you want
+7. Be sure that a configured external command works exactly how you want
    when you run it directly on the command line **before** you configure
    it for `libinput-gestures`. E.g. run `xdotool` manually and
    experiment with various arguments to work out exactly what arguments
    it requires to do what you want, and only then add that command +
    arguments to your custom configuration in
-   `~/.config/libinput-gestures.conf`.
+   `~/.config/libinput-gestures.conf`. Clearly, if the your manual
+   `xdotool` command does not work correctly then there is no point
+   raising an `libinput-gestures` issue about it!
+
+8. **If you raise an issue, always include the output** of
+   `libinput-gestures -l` to show the environment and configuration you
+   are using. If appropriate, also paste the output from steps 4 and 5
+   above. If your device is not being recognised by `libinput-gestures`
+   at all, paste the output of `libinput list-devices`
+   (`libinput-list-devices` on libinput < v1.8).
 
 ### LICENSE
 
