@@ -1,14 +1,15 @@
 ---
-name: Bug report
-about: Create a report to help us improve
+name: New Issue
+about: Create a new issue report
 
 ---
 
-Before creating a new issue, please follow each step in the TROUBLESHOOTING section of the main README.md.
+Before creating a new issue, please follow each step in the
+TROUBLESHOOTING section of the main README.
 
 ```
-Paste the output of libinput-gestures -l here
+Run libinput-gestures -l on the command line and paste the output here.
 ```
 
-**Describe the bug**
-A clear and concise description of what the bug is.
+**Describe the issue**
+A clear and concise description of what the issue is.
