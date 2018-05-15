@@ -15,7 +15,7 @@ USERDIR = os.getenv('XDG_CONFIG_HOME', os.path.expanduser('~/.config'))
 CONFDIRS = (USERDIR, '/etc')
 
 # Ratio of X/Y (or Y/X) at which we consider an oblique swipe gesture.
-# The number is the trigger angle in degrees.
+# The number is the trigger angle in degrees and set to 360/8/2.
 OBLIQUE_RATIO = math.tan(math.radians(22.5))
 
 # Minimum significant distance to move for swipes, in dots.
@@ -358,11 +358,7 @@ class SWIPE(GESTURE):
         x, y = self.data
         abx = abs(x)
         aby = abs(y)
-
-        # Require absolute distance movement beyond a small thresh-hold.
         abz = math.sqrt(abx**2 + aby**2)
-        if abz < MINABZ:
-            return
 
         # Discriminate left/right or up/down.
         # If significant movement in both planes the consider it a
