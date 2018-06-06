@@ -52,8 +52,8 @@ libinput release 1.0 or later. Install prerequisites:
     # E.g. On Fedora:
     sudo dnf install xdotool wmctrl
 
-Debian and Ubuntu users also need to install `libinput-tools` if that
-package exists in your release:
+Debian and Ubuntu users may also need to install `libinput-tools` if
+that package exists in your release:
 
     sudo apt-get install libinput-tools
 
