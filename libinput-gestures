@@ -36,6 +36,8 @@ opt.add_argument('-l', '--list', action='store_true',
         help='just list out environment and configuration')
 opt.add_argument('--device',
         help='explicit device name to use (or path if starts with /)')
+opt.add_argument('--device-list', help=argparse.SUPPRESS)
+        #help='file containing libinput list device output to parse')
 args = opt.parse_args()
 
 if args.debug or args.raw or args.list:
@@ -88,7 +90,12 @@ else:
 
 def get_devices_list():
     'Get list of devices and their attributes (as a dict) from libinput'
-    stdout = run(cmd_list_devices.split())
+    if args.device_list:
+        with open(args.device_list) as fd:
+            stdout = fd.read()
+    else:
+        stdout = run(cmd_list_devices.split())
+
     if stdout:
         dev = {}
         for line in stdout.splitlines():

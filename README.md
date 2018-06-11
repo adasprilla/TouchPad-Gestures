@@ -283,7 +283,7 @@ the following steps.
    `libinput-gestures -l` to show the environment and configuration you
    are using. If appropriate, also paste the output from steps 4 and 5
    above. If your device is not being recognised by `libinput-gestures`
-   at all, paste the output of `libinput list-devices`
+   at all, paste the complete output of `libinput list-devices`
    (`libinput-list-devices` on libinput < v1.8).
 
 ### LICENSE
