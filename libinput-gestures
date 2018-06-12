@@ -36,8 +36,9 @@ opt.add_argument('-l', '--list', action='store_true',
         help='just list out environment and configuration')
 opt.add_argument('--device',
         help='explicit device name to use (or path if starts with /)')
+# Test/diag hidden option to specify a file containing libinput list
+# device output to parse
 opt.add_argument('--device-list', help=argparse.SUPPRESS)
-        #help='file containing libinput list device output to parse')
 args = opt.parse_args()
 
 if args.debug or args.raw or args.list:
