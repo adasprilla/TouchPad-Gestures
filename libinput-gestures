@@ -261,7 +261,12 @@ class GESTURE:
             self.has_extended = True
 
         key = (motion, fingers) if fingers else motion
-        cmds = shlex.split(command)
+
+        try:
+            cmds = shlex.split(command)
+        except Exception as e:
+            return str(e)
+
         cls = internal_commands.get(cmds[0], COMMAND)
         self.motions[key] = cls(cmds)
         return None
