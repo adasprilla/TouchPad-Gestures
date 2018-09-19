@@ -38,7 +38,9 @@ completely**, and then log back in to assign this group (or just
 reboot).
 
 NOTE: Arch users can just install [_libinput-gestures from the
-AUR_][AUR]. openSUSE users can install from [OBS](https://software.opensuse.org/package/libinput-gestures). Then skip to the next CONFIGURATION section.
+AUR_][AUR]. openSUSE users can install from
+[OBS](https://software.opensuse.org/package/libinput-gestures). Then
+skip to the next CONFIGURATION section.
 
 You need python 3.4 or later, python2 is not supported. You also need
 libinput release 1.0 or later. Install prerequisites:
