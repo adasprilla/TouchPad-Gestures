@@ -20,15 +20,18 @@ usage() {
     echo "As root: sudo $PROG install|uninstall"
     echo "As user: $PROG start|stop|restart|autostart|autostop|status"
     echo
-    echo "(-d option sets DESTDIR for install/uninstall)"
+    echo "-d <dir> (option sets DESTDIR for install/uninstall)"
+    echo "-r (force allow root to perform user commands. PLEASE AVOID USING THIS!)"
     exit 1
 }
 
 # Process command line options
 DESTDIR=""
-while getopts d: c; do
+FORCEROOT=0
+while getopts d:r c; do
     case $c in
     d) DESTDIR="$OPTARG";;
+    r) FORCEROOT=1;;
     \?) usage;;
     esac
 done
@@ -180,7 +183,7 @@ if [[ $cmd == install || $cmd == uninstall ]]; then
 	fi
     fi
 else
-    if [[ $(id -un) == root ]]; then
+    if [[ $(id -un) == root && $FORCEROOT == 0 ]]; then
 	echo "Non-installation commands must be run as your own user."
 	exit 1
     fi
