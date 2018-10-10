@@ -303,8 +303,16 @@ class SWIPE(GESTURE):
 
     def update(self, coords):
         'Update this gesture for a motion'
-        self.data[0] += float(coords[2])
-        self.data[1] += float(coords[3])
+        # Ignore this update if we can not parse the numbers we expect
+        try:
+            x = float(coords[2])
+            y = float(coords[3])
+        except (ValueError, IndexError):
+            return False
+
+        self.data[0] += x
+        self.data[1] += y
+        return True
 
     def end(self):
         'Action this gesture at the end of a motion sequence'
@@ -338,8 +346,16 @@ class PINCH(GESTURE):
 
     def update(self, coords):
         'Update this gesture for a motion'
-        self.data[0] += float(coords[4]) - 1.0
-        self.data[1] += float(coords[5])
+        # Ignore this update if we can not parse the numbers we expect
+        try:
+            x = float(coords[4])
+            y = float(coords[5])
+        except (ValueError, IndexError):
+            return False
+
+        self.data[0] += x - 1.0
+        self.data[1] += y
+        return True
 
     def end(self):
         'Action this gesture at the end of a motion sequence'
@@ -542,7 +558,10 @@ for line in cmd.stdout:
     if event == 'UPDATE':
         if handler:
             # Split parameters into list of clean numbers
-            handler.update(re.split(r'[^-.\d]+', params))
+            if not handler.update(re.split(r'[^-.\d]+', params)):
+                print('Could not parse {} {}: {}'.format(gesture, event,
+                    params), file=sys.stderr)
+
     elif event == 'BEGIN':
         handler = handlers.get(gesture)
         if handler:
