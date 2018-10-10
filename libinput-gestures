@@ -442,12 +442,14 @@ def unexpanduser(cfile):
     return ('~/' + str(relhome)) if relhome else str(relslash)
 
 if args.verbose:
+    vers = run(('md5sum', opt.prog), check=False)
+    vers = str(vers.split()[0]) if vers else '?'
     xsession = os.getenv('XDG_SESSION_DESKTOP') or \
             os.getenv('DESKTOP_SESSION') or 'unknown'
     xtype = os.getenv('XDG_SESSION_TYPE') or 'unknown'
-    print('{}: session {}+{} on {}, python {}, libinput {}'.format(PROG,
-        xsession, xtype, platform.platform(), platform.python_version(),
-        libvers))
+    print('{}: session {}+{} on {}, python {}, libinput {}, hash {}'.format(
+        PROG, xsession, xtype, platform.platform(),
+        platform.python_version(), libvers, vers))
 
 # Search for configuration file. Use file given as command line
 # argument, else look for file in search dir order.

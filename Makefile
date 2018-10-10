@@ -13,6 +13,7 @@
 # details.
 
 DOC = README.md
+SHELLCHECK_OPTS = -eSC2053,SC2064,SC2086,SC1117,SC2162,SC2181,SC2034,SC1090,SC2115
 
 DOCOUT = $(DOC:.md=.html)
 
@@ -27,6 +28,7 @@ uninstall:
 
 check:
 	flake8 libinput-gestures
+	shellcheck $(SHELLCHECK_OPTS) libinput-gestures-setup list-version-hashes
 
 doc:	$(DOCOUT)
 

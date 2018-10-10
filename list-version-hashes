@@ -1,0 +1,61 @@
+#!/bin/bash
+# M.Blakeney, Oct 2018.
+
+PROG="$(basename $0)"
+PROGDIR="$(dirname $0)"
+SUMPROG="md5sum"
+
+usage() {
+    echo "Usage: $PROG [-options] [hashsum]"
+    echo "Development utility to list version and hash sums, and flag those that"
+    echo "match given hash sum. Must be run from the libinput-gestures git repo dir."
+    echo "Options: (none)"
+    exit 1
+}
+
+# Process command line options
+while getopts \? c; do
+    case $c in
+    \?) usage;;
+    esac
+done
+
+shift $((OPTIND - 1))
+
+if [[ $# -eq 1 ]]; then
+    HASHSUM="$1"
+elif [[ $# -ne 0 ]]; then
+    usage
+else
+    HASHSUM=""
+fi
+
+output() {
+    local tag=$1
+    local hashsum=${2/ */}
+
+    if [[ -n $HASHSUM && $HASHSUM == $hashsum ]]; then
+	found=" *"
+    else
+	found=""
+    fi
+
+    printf "%-24s %s%s\n" $tag $hashsum "$found"
+}
+
+cd ${PROGDIR:-.} || exit 1
+
+# Iterate through all tags and output the md5 hash for each version
+tag=""
+while read hashc; do
+    tag=$(git describe --tags --always $hashc)
+    hashsum=$(git show $hashc:libinput-gestures | $SUMPROG)
+    output $tag $hashsum
+done <<< "$(git rev-list --all --reverse)"
+
+# Output a version for the working tree as well
+tagw=$(git describe --tags --always --dirty)
+if [[ $tagw != $tag ]]; then
+    hashsum=$($SUMPROG libinput-gestures)
+    output $tagw $hashsum
+fi
