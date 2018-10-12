@@ -154,6 +154,8 @@ def get_device(name):
 class COMMAND:
     'Generic command handler'
     def __init__(self, args):
+        # Expand '~' and env vars in executable command name
+        args[0] = os.path.expandvars(os.path.expanduser(args[0]))
         self.argslist = args
 
     def run(self):
