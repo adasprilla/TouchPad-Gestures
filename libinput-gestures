@@ -6,11 +6,12 @@ from collections import OrderedDict
 from pathlib import Path
 from distutils.version import LooseVersion as Version
 
-PROG = Path(sys.argv[0]).stem
+PROGPATH = Path(sys.argv[0])
+PROGNAME = PROGPATH.stem
 
 # Conf file containing gesture commands.
 # Search first for user file then system file.
-CONFNAME = '{}.conf'.format(PROG)
+CONFNAME = '{}.conf'.format(PROGNAME)
 USERDIR = os.getenv('XDG_CONFIG_HOME', os.path.expanduser('~/.config'))
 CONFDIRS = (USERDIR, '/etc')
 
@@ -288,7 +289,7 @@ class GESTURE:
                 self.motions.get(motion)
 
         if args.verbose:
-            print('{}: {} {} {} {}'.format(PROG, self.name, motion,
+            print('{}: {} {} {} {}'.format(PROGNAME, self.name, motion,
                 self.fingers, self.data))
             if command:
                 print('  ', command)
@@ -460,14 +461,18 @@ def unexpanduser(cfile):
     return ('~/' + str(relhome)) if relhome else str(relslash)
 
 if args.verbose:
-    vers = run(('md5sum', opt.prog), check=False)
-    vers = str(vers.split()[0]) if vers else '?'
+    # Output various info/version info
     xsession = os.getenv('XDG_SESSION_DESKTOP') or \
             os.getenv('DESKTOP_SESSION') or 'unknown'
     xtype = os.getenv('XDG_SESSION_TYPE') or 'unknown'
-    print('{}: session {}+{} on {}, python {}, libinput {}, hash {}'.format(
-        PROG, xsession, xtype, platform.platform(),
-        platform.python_version(), libvers, vers))
+    print('{}: session {}+{} on {}, python {}, libinput {}'.format(
+        PROGNAME, xsession, xtype, platform.platform(),
+        platform.python_version(), libvers))
+
+    # Output hash version/checksum of this program
+    vers = run(('md5sum', str(PROGPATH)), check=False)
+    vers = str(vers.split()[0]) if vers else '?'
+    print('{}: hash {}'.format(PROGPATH, vers))
 
 # Search for configuration file. Use file given as command line
 # argument, else look for file in search dir order.
@@ -511,10 +516,10 @@ else:
 
 if args.verbose:
     if device:
-        print('{}: device {}: {}'.format(PROG, device.get('kernel'),
+        print('{}: device {}: {}'.format(PROGNAME, device.get('kernel'),
             device.get('device')))
     else:
-        print('{}: monitoring all devices'.format(PROG))
+        print('{}: monitoring all devices'.format(PROGNAME))
 
 # If just called to list out above environment info then exit now
 if args.list:
@@ -522,9 +527,10 @@ if args.list:
 
 # Make sure only one instance running for current user
 user = getpass.getuser()
-proglock = open_lock(PROG, user)
+proglock = open_lock(PROGNAME, user)
 if not proglock:
-    sys.exit('{} is already running for {}, terminating ..'.format(PROG, user))
+    sys.exit('{} is already running for {}, terminating ..'.format(
+        PROGNAME, user))
 
 # Set up square of swipe threshold
 abzsquare = swipe_min_threshold**2
