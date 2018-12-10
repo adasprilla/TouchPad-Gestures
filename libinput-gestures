@@ -155,6 +155,8 @@ def get_device(name):
 class COMMAND:
     'Generic command handler'
     def __init__(self, args):
+        self.reprstr = ' '.join(args)
+
         # Expand '~' and env vars in executable command name
         args[0] = os.path.expandvars(os.path.expanduser(args[0]))
         self.argslist = args
@@ -164,8 +166,8 @@ class COMMAND:
         run(self.argslist)
 
     def __str__(self):
-        'Create string representation'
-        return ' '.join(self.argslist)
+        'Return string representation'
+        return self.reprstr
 
 # Table of internal commands
 internal_commands = OrderedDict()
@@ -332,11 +334,11 @@ class SWIPE(GESTURE):
         # oblique swipe (but only if any are configured)
         if abx > aby:
             motion = 'left' if x < 0 else 'right'
-            if self.has_extended and aby / abx > OBLIQUE_RATIO:
+            if self.has_extended and abx > 0 and aby / abx > OBLIQUE_RATIO:
                 motion += '_up' if y < 0 else '_down'
         else:
             motion = 'up' if y < 0 else 'down'
-            if self.has_extended and abx / aby > OBLIQUE_RATIO:
+            if self.has_extended and aby > 0 and abx / aby > OBLIQUE_RATIO:
                 motion = ('left_' if x < 0 else 'right_') + motion
 
         self.action(motion)
