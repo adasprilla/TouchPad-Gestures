@@ -1,6 +1,7 @@
 ### LIBINPUT-GESTURES
 
-[Libinput-gestures][REPO] is a utility which reads libinput gestures
+[Libinput-gestures][REPO] is a utility which reads [libinput
+gestures](https://wayland.freedesktop.org/libinput/doc/latest/gestures.html)
 from your touchpad and maps them to gestures you configure in a
 configuration file. Each gesture can be configured to activate a shell
 command which is typically an [_xdotool_][XDOTOOL] command to action
@@ -65,6 +66,8 @@ Install this software:
 
 ### CONFIGURATION
 
+It is helpful to start by reading the documentation about [what libinput
+calls gestures](https://wayland.freedesktop.org/libinput/doc/latest/gestures.html).
 Many users will be happy with the default configuration in which case
 you can just type the following and you are ready to go:
 
@@ -90,15 +93,17 @@ NOTE: If you don't use "natural" scrolling direction for your touchpad
 then you may want to swap the default left/right and up/down
 configurations.
 
-You can choose to specify a specific finger count, typically 3 or 4
-fingers. If specified then the command is executed when exactly that
+You can choose to specify a specific finger count, typically [3 or more
+fingers for swipe](https://wayland.freedesktop.org/libinput/doc/latest/gestures.html#swipe-gestures),
+and [2 or more for pinch](https://wayland.freedesktop.org/libinput/doc/latest/gestures.html#pinch-gestures).
+If a finger count is specified then the command is executed when exactly that
 number of fingers is used in the gesture. If not specified then the
-command is executed when that gesture is executed with any number of
+command is executed when that gesture is invoked with any number of
 fingers. Gestures specified with finger count have priority over the
 same gesture specified without any finger count.
 
 Of course, 2 finger swipes and taps are already interpreted by your DE
-and apps for scrolling etc.
+and apps [for scrolling](https://wayland.freedesktop.org/libinput/doc/latest/scrolling.html#two-finger-scrolling) etc.
 
 IMPORTANT: Test the program. Check for reported errors in your custom
 gestures, missing packages, etc:
@@ -187,7 +192,7 @@ Wayland and Xorg, and with GNOME, KDE, and other EWMH compliant
 desktops, it is now the default configuration command for swipe up and
 down commands in `libinput-gestures.conf`. See the comments in that file
 about other options you can do with the `_internal` command.
-Unfortunately `_internal` does not currently work with Compiz for Ubuntu
+Unfortunately `_internal` does not work with Compiz for Ubuntu
 Unity desktop so also see the explicit example there for Unity.
 
 Of course, `xdotool` commands do work via XWayland for Xorg based apps
