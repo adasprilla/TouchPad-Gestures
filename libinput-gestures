@@ -113,6 +113,10 @@ def get_devices_list():
                 yield dev
                 dev = {}
 
+        # Ensure we include last device
+        if dev:
+            yield dev
+
 def get_device(name):
     'Determine libinput touchpad device'
     devices = list(get_devices_list())
