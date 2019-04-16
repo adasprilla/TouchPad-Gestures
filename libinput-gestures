@@ -461,7 +461,7 @@ def unexpanduser(cfile):
     relslash = Path(os.path.abspath(str(cfile)))
     try:
         relhome = relslash.relative_to(os.getenv('HOME'))
-    except ValueError:
+    except (ValueError, TypeError):
         relhome = None
 
     return ('~/' + str(relhome)) if relhome else str(relslash)
