@@ -2,6 +2,7 @@
 'Read gestures from libinput touchpad and action shell commands.'
 # Mark Blakeney, Sep 2015
 import os, sys, argparse, subprocess, shlex, re, getpass, fcntl, platform, math
+from time import monotonic
 from collections import OrderedDict
 from pathlib import Path
 from distutils.version import LooseVersion as Version
@@ -22,6 +23,11 @@ OBLIQUE_RATIO = math.tan(math.radians(22.5))
 # Default minimum significant distance to move for swipes, in dots.
 # Can be changed using configuration command.
 swipe_min_threshold = 0
+
+# Timeout on gesture action from start to end. 0 = no timeout. In secs.
+# Can be changed using configuration command.
+DEFAULT_TIMEOUT = 4
+timeoutv = DEFAULT_TIMEOUT
 
 # Rotation threshold in degrees to discriminate pinch rotate from in/out
 ROTATE_ANGLE = 15.0
@@ -288,6 +294,7 @@ class GESTURE:
         'Initialise this gesture at the start of motion'
         self.fingers = fingers
         self.data = [0.0, 0.0]
+        self.starttime = monotonic()
 
     def action(self, motion):
         'Action a motion command for this gesture'
@@ -299,6 +306,11 @@ class GESTURE:
                 self.fingers, self.data))
             if command:
                 print('  ', command)
+
+        if timeoutv > 0 and (self.starttime + timeoutv) < monotonic():
+            if args.verbose:
+                print('  ', 'timeout - no action')
+            return
 
         if command and not args.debug:
             command.run()
@@ -429,6 +441,17 @@ def swipe_threshold(lineargs):
 
     return None if swipe_min_threshold >= 0 else 'Must be >= 0'
 
+@add_conf_command
+def timeout(lineargs):
+    'Change gesture timeout'
+    global timeoutv
+    try:
+        timeoutv = float(lineargs)
+    except Exception:
+        return 'Must be float value'
+
+    return None if timeoutv >= 0 else 'Must be >= 0'
+
 def get_conf_line(line):
     'Process a single line in conf file'
     key, *argslist = line.split(maxsplit=1)
@@ -511,6 +534,10 @@ if args.verbose and not args.raw:
                 fingers, cmd))
     if args.device:
         print('device {}'.format(args.device))
+    if swipe_min_threshold:
+        print('swipe_threshold {}'.format(swipe_min_threshold))
+    if timeoutv != DEFAULT_TIMEOUT:
+        print('timeout {}'.format(timeoutv))
 
 # Get touchpad device
 if not args.device or args.device.lower() != "all":
