@@ -26,7 +26,7 @@ swipe_min_threshold = 0
 
 # Timeout on gesture action from start to end. 0 = no timeout. In secs.
 # Can be changed using configuration command.
-DEFAULT_TIMEOUT = 4
+DEFAULT_TIMEOUT = 1.5
 timeoutv = DEFAULT_TIMEOUT
 
 # Rotation threshold in degrees to discriminate pinch rotate from in/out
