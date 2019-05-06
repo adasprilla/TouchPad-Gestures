@@ -65,7 +65,8 @@ launch() {
     fi
 
     if hash i3-msg &>/dev/null; then
-	i3-msg exec $BINDIR/$APP >/dev/null
+	i3-msg exec $BINDIR/$app >/dev/null
+	# i3-msg will return successfully even if "$app" fails to start
 	return $?
     fi
 
