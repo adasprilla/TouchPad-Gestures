@@ -525,19 +525,22 @@ confname = unexpanduser(conffile)
 get_conf(conffile, confname)
 
 # List out available gestures if that is asked for
-if args.verbose and not args.raw:
-    print('Gestures configured in {}:'.format(confname))
-    for h in handlers.values():
-        for mpair, cmd in h.motions.items():
-            motion, fingers = (mpair, '') if isinstance(mpair, str) else mpair
-            print('{} {:10}{:>2} {}'.format(h.name.lower(), motion,
-                fingers, cmd))
+if args.verbose:
+    if not args.raw:
+        print('Gestures configured in {}:'.format(confname))
+        for h in handlers.values():
+            for mpair, cmd in h.motions.items():
+                motion, fingers = (mpair, '') if isinstance(mpair, str) else mpair
+                print('{} {:10}{:>2} {}'.format(h.name.lower(), motion,
+                    fingers, cmd))
+
+        if swipe_min_threshold:
+            print('swipe_threshold {}'.format(swipe_min_threshold))
+        if timeoutv != DEFAULT_TIMEOUT:
+            print('timeout {}'.format(timeoutv))
+
     if args.device:
         print('device {}'.format(args.device))
-    if swipe_min_threshold:
-        print('swipe_threshold {}'.format(swipe_min_threshold))
-    if timeoutv != DEFAULT_TIMEOUT:
-        print('timeout {}'.format(timeoutv))
 
 # Get touchpad device
 if not args.device or args.device.lower() != "all":
