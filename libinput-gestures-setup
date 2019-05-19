@@ -190,10 +190,10 @@ else
     fi
 
     # Remove any old configuration from earlier versions of program
-    rm -fv ~/bin/$NAME
-    rm -fv ~/.local/bin/$NAME
-    rm -fv ~/.local/share/applications/$NAME.desktop
-    rm -fv ~/.local/share/icons/$NAME.png
+    rm -fv ~/bin/$NAME 2>/dev/null
+    rm -fv ~/.local/bin/$NAME 2>/dev/null
+    rm -fv ~/.local/share/applications/$NAME.desktop 2>/dev/null
+    rm -fv ~/.local/share/icons/$NAME.png 2>/dev/null
 
     # Look for and update any autostart file if it is a link or not
     # pointing to the latest desktop entry. Apparently user autostart
