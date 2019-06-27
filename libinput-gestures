@@ -67,21 +67,21 @@ def open_lock(*args):
     return fp
 
 def run(cmd, *, check=True, block=True):
-    'Run subprocess function and return standard output or None'
+    'Run function and return standard output, Popen() handle, or None'
     # Maintain subprocess compatibility with python 3.4 so use
     # check_output() rather than run().
     try:
         if block:
-            stdout = subprocess.check_output(cmd, universal_newlines=True,
+            result = subprocess.check_output(cmd, universal_newlines=True,
                     stderr=(None if check else subprocess.DEVNULL))
         else:
-            stdout = subprocess.Popen(cmd)
+            result = subprocess.Popen(cmd)
     except Exception as e:
-        stdout = None
+        result = None
         if check:
             print(str(e), file=sys.stderr)
 
-    return stdout
+    return result
 
 def get_libinput_vers():
     'Return the libinput installed version number string'
