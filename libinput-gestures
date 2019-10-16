@@ -147,7 +147,7 @@ def get_device(name, cmd_list_devices, device_list):
                 dirpath = Path(dirstr)
                 if dirpath.exists():
                     for path in dirpath.iterdir():
-                        if devpath.samefile(path.resolve()):
+                        if path.resolve() == devpath:
                             devname = str(path)
                             evname = '({})'.format(devpath.name)
                             break
