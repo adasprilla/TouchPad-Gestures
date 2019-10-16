@@ -79,15 +79,23 @@ reading ..
 
 The default gestures are in `/etc/libinput-gestures.conf`. If you want
 to create your own custom gestures then copy that file to
-`~/.config/libinput-gestures.conf` and edit it. The available gestures
-are:
+`~/.config/libinput-gestures.conf` and edit it. There are many examples
+and options described in that file. The available gestures are:
 
-- swipe up (e.g. map to GNOME/KDE/etc move to next workspace)
-- swipe down (e.g map to GNOME/KDE/etc move to prev workspace)
-- swipe left (e.g. map to Web browser go forward)
-- swipe right (e.g. map to Web browser go back)
-- pinch in (e.g. map to GNOME open/close overview)
-- pinch out (e.g. map to GNOME open/close overview)
+|Gesture               |Example Mapping |
+|-------               |--------------- |
+|`swipe up`            |GNOME/KDE/etc move to next workspace |
+|`swipe down`          |GNOME/KDE/etc move to prev workspace |
+|`swipe left`          |Web browser go forward |
+|`swipe right`         |Web browser go back |
+|`swipe left_up`       |Jump to next open web browser tab |
+|`swipe left_down`     |Jump to previous open web browser tab |
+|`swipe right_up`      |Close current web browser tab |
+|`swipe right_down`    |Reopen and jump to last closed web browser tab |
+|`pinch in`            |GNOME open/close overview |
+|`pinch out`           |GNOME open/close overview |
+|`pinch clockwise`     ||
+|`pinch anticlockwise` ||
 
 NOTE: If you don't use "natural" scrolling direction for your touchpad
 then you may want to swap the default left/right and up/down
@@ -223,12 +231,12 @@ configuration file but you can enable extended gestures which augment
 the gestures listed above in CONFIGURATION. See the commented out
 examples in `libinput-gestures.conf`.
 
-- swipe right_up (e.g. jump to next open browser tab)
-- swipe left_up (e.g. jump to previous open browser tab)
-- swipe left_down (e.g. close current browser tab)
-- swipe right_down (e.g. reopen and jump to last closed browser tab)
-- pinch clockwise
-- pinch anticlockwise
+- `swipe right_up` (e.g. jump to next open browser tab)
+- `swipe left_up` (e.g. jump to previous open browser tab)
+- `swipe left_down` (e.g. close current browser tab)
+- `swipe right_down` (e.g. reopen and jump to last closed browser tab)
+- `pinch clockwise`
+- `pinch anticlockwise`
 
 So instead of just configuring the usual swipe up/down and left/right
 each at 90 degrees separation, you can add the above extra 4 swipes to

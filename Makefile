@@ -27,13 +27,16 @@ uninstall:
 	@./libinput-gestures-setup -d "$(DESTDIR)" uninstall
 
 check:
-	flake8 libinput-gestures
+	flake8 libinput-gestures internal internal-test
 	shellcheck $(SHELLCHECK_OPTS) libinput-gestures-setup list-version-hashes
 
 doc:	$(DOCOUT)
 
 $(DOCOUT): $(DOC)
 	markdown $< >$@
+
+test:
+	@./internal-test
 
 clean:
 	rm -rf $(DOCOUT)
