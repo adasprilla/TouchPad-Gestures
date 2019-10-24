@@ -218,7 +218,7 @@ class COMMAND_internal(COMMAND):
         opt.add_argument('-w', '--wrap', action='store_true',
                 help='wrap workspaces when switching to/from start/end')
         opt.add_argument('-c', '--cols', type=int,
-                help='number of horizontal columns in virtual desktop grid')
+                help='number of columns in virtual desktop grid, default=1')
         opt.add_argument('--row', type=int, default=0, help=argparse.SUPPRESS)
         opt.add_argument('--col', type=int, default=0, help=argparse.SUPPRESS)
         opt.add_argument('action', choices=self.commands_list,
@@ -232,17 +232,21 @@ class COMMAND_internal(COMMAND):
         if cmdi >= 2:
             if args.row or args.col:
                 opt.error('Legacy "--row" and "--col" not supported')
-            if not args.cols:
+            if args.cols is None:
                 if cmdi < 4:
                     self.cols = 1
                     cmdi -= 2
                 else:
                     opt.error('"--cols" must be specified')
+            elif args.cols < 1:
+                opt.error('"--cols" must be >= 1')
             else:
                 self.cols = args.cols
         else:
             # Convert old legacy/depreciated arguments to new arguments
-            if args.cols:
+            if args.cols is not None:
+                if args.cols < 1:
+                    opt.error('"--cols" must be >= 1')
                 self.cols = args.cols
             elif args.row:
                 cmdi += 2
