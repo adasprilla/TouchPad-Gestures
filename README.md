@@ -191,7 +191,7 @@ You can check the status of the app with:
 
 This utility exploits `xdotool` which unfortunately only works with
 X11/Xorg based applications. So `xdotool` shortcuts for the desktop do
-not work under GNOME on Wayland which is now the default since GNOME
+not work under GNOME on Wayland which is the default since GNOME
 3.22. However, it is found that `wmctrl` desktop selection commands do work
 under GNOME on Wayland (via XWayland) so this utility adds a built-in
 `_internal` command which can be used to switch workspaces using the
@@ -199,7 +199,7 @@ swipe commands.
 The `_internal` `ws_up` and `ws_down` commands use `wmctrl` to work out
 the current workspace and select the next one. Since this works on both
 Wayland and Xorg, and with GNOME, KDE, and other EWMH compliant
-desktops, it is now the default configuration command for swipe up and
+desktops, it is the default configuration command for swipe up and
 down commands in `libinput-gestures.conf`. See the comments in that file
 about other options you can do with the `_internal` command.
 Unfortunately `_internal` does not work with Compiz for Ubuntu

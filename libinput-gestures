@@ -111,8 +111,8 @@ def get_device_info(name, cmd_list_devices, device_list):
             # If the device name starts with a '/' then it is instead
             # considered as the explicit device path although since
             # device paths can change through reboots this is best to be
-            # a symlink. E.g. use the corresponding full path link under
-            # /dev/input/by-path/ or /dev/input/by-id/.
+            # a symlink. E.g. users should use the corresponding full
+            # path link under /dev/input/by-path/ or /dev/input/by-id/.
             if kdev:
                 if d.get('kernel') == kdev:
                     return d
@@ -125,13 +125,11 @@ def get_device_info(name, cmd_list_devices, device_list):
         if 'size' in d and 'pointer' in d.get('capabilities'):
             return d
     # Otherwise look for 1st device with touchpad in it's name
-    for d in devices:
-        if re.search(r'touch ?pad', d.get('device', ''), re.I):
-            return d
-    # Otherwise look for 1st device with trackpad in it's name
-    for d in devices:
-        if re.search(r'track ?pad', d.get('device', ''), re.I):
-            return d
+    # or, failing that, 1st device with trackpad in it's name
+    for txt in ('touch ?pad', 'track ?pad'):
+        for d in devices:
+            if re.search(txt, d.get('device', ''), re.I):
+                return d
 
     # Give up
     return None
