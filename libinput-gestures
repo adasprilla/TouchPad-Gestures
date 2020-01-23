@@ -1,7 +1,17 @@
 #!/usr/bin/env python3
 'Read gestures from libinput touchpad and action shell commands.'
 # Mark Blakeney, Sep 2015
-import os, sys, argparse, subprocess, shlex, re, getpass, fcntl, platform, math
+import os
+import sys
+import argparse
+import subprocess
+import shlex
+import re
+import getpass
+import fcntl
+import platform
+import math
+import signal
 from time import monotonic
 from collections import OrderedDict
 from pathlib import Path
@@ -703,6 +713,9 @@ def main():
 
     cmd = subprocess.Popen(shlex.split(command), stdout=subprocess.PIPE,
             bufsize=1, universal_newlines=True)
+
+    # Avoid producing zombie processes
+    signal.signal(signal.SIGCHLD, signal.SIG_IGN)
 
     # Sit in a loop forever reading the libinput messages ..
     handler = None
