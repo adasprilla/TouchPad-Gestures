@@ -58,8 +58,6 @@ def open_lock(*args):
 
 def run(cmd, *, check=True, block=True):
     'Run function and return standard output, Popen() handle, or None'
-    # Maintain subprocess compatibility with python 3.4 so use
-    # check_output() rather than run().
     try:
         if block:
             result = subprocess.check_output(cmd, universal_newlines=True,
