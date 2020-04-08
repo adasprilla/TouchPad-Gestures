@@ -174,6 +174,11 @@ You can check the status of the app with:
 
     libinput-gestures-setup status
 
+Note on some uncommon systems `libinput-gestures-setup start` may fail
+to start the application returning you a message _Don't know how to
+invoke libinput-gestures.desktop_. If you get this, install the dex
+package, preferably from your system packages repository, and try again.
+
 ### UPGRADE
 
     # cd to source dir, as above
