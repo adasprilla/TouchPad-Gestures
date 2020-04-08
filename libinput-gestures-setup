@@ -63,11 +63,7 @@ launch() {
 
     local cmdline
     for cmdline in "${cmds[@]}" ; do
-	set -- $cmdline
-	local de=$1
-	local cmd=$2
-	shift 2
-	local args="$*"
+	IFS=' ' read de cmd args <<< "$cmdline"
 
         # Skip if the command does not exist
 	if ! hash $cmd &>/dev/null; then
