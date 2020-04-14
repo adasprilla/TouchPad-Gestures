@@ -147,9 +147,8 @@ if needed. If you have multiple touchpads you can also specify
 
 ### STARTING AND STOPPING
 
-Search for, and then start, the `libinput-gestures` app in your DE or
-you can start it immediately in the background using the command line
-utility:
+Start the application immediately in the background using the command
+line utility:
 
     libinput-gestures-setup start
 
