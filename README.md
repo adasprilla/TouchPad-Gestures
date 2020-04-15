@@ -175,8 +175,9 @@ You can check the status of the app with:
 
 Note on some uncommon systems `libinput-gestures-setup start` may fail
 to start the application returning you a message _Don't know how to
-invoke libinput-gestures.desktop_. If you get this, install the dex
-package, preferably from your system packages repository, and try again.
+invoke libinput-gestures.desktop_. If you get this error message,
+install the dex package, preferably from your system packages
+repository, and try again.
 
 ### UPGRADE
 
@@ -247,6 +248,17 @@ each at 90 degrees separation, you can add the above extra 4 swipes to
 give a total of 8 swipe gestures each at 45 degrees separation. It works
 better than you may expect, at least after some practice. It means you
 can completely manage browser tabs from your touchpad.
+
+### PROBLEM RESUMING FROM SUSPEND
+
+Some touchpads have a problem which causes `libinput-gestures` to stop
+after resuming from a system suspend. You can use a companion program
+[`dbus-action`](https://github.com/bulletmark/dbus-action/) to overcome
+this. See the example configuration for `libinput-gestures` in the
+default `dbus-action` [configuration
+file](https://github.com/bulletmark/dbus-action/blob/master/dbus-action.conf).
+This utility can also be used to restart `libinput-gestures` on
+any D-Bus event.
 
 ### TROUBLESHOOTING
 
