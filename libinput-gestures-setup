@@ -98,9 +98,9 @@ auto_start() {
     fi
 
     if ! cmp -s $APPDIR/$NAME.desktop $AUTDIR/$NAME.desktop; then
-	mkdir -p $AUTDIR
-	cp $APPDIR/$NAME.desktop $AUTDIR
-	echo "installed or updated $AUTDIR/$NAME.desktop"
+	if mkdir -p $AUTDIR && cp $APPDIR/$NAME.desktop $AUTDIR; then
+	    echo "installed or updated $AUTDIR/$NAME.desktop"
+	fi
     fi
     return 0
 }
@@ -174,11 +174,6 @@ if [[ $cmd == install || $cmd == uninstall ]]; then
 	install -CDv -m 644 -t $DESTDIR$ICODIR $NAME.svg
 	install -CDv -m 644 -t $DESTDIR$CNFDIR $NAME.conf
 	install -CDv -m 644 -t $DESTDIR$DOCDIR README.md
-
-	# Also install HTML file if markdown is available
-	if hash markdown &>/dev/null; then
-	    markdown -o $DESTDIR$DOCDIR/README.html README.md
-	fi
     else
 	rm -rfv $DESTDIR$BINDIR/$NAME
 	rm -rfv $DESTDIR$APPDIR/$NAME.desktop
