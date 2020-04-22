@@ -249,16 +249,22 @@ give a total of 8 swipe gestures each at 45 degrees separation. It works
 better than you may expect, at least after some practice. It means you
 can completely manage browser tabs from your touchpad.
 
-### PROBLEM RESUMING FROM SUSPEND
+### AUTOMATIC STOP/RESTART ON D-BUS EVENTS SUCH AS SUSPEND
 
-Some touchpads have a problem which causes `libinput-gestures` to stop
-after resuming from a system suspend. You can use a companion program
-[`dbus-action`](https://github.com/bulletmark/dbus-action/) to overcome
-this. See the example configuration for `libinput-gestures` in the
-default `dbus-action` [configuration
+There are some situations where you may want to automatically stop,
+start, or restart `libinput-gestures`. E.g. some touchpads have a
+problem which causes `libinput-gestures` (actually the underlying
+`libinput debug-events`) to hang after resuming from a system suspend so
+those users want to stop `libinput-gestures` when a system goes into
+suspend and then start it again with resuming. You can use a companion
+program [`dbus-action`][DBUS] to
+do this. See the example configuration for `libinput-gestures` in the
+default [`dbus-action`][DBUS] [configuration
 file](https://github.com/bulletmark/dbus-action/blob/master/dbus-action.conf).
-This utility can also be used to restart `libinput-gestures` on
-any D-Bus event.
+
+The [`dbus-action`][DBUS] utility can also be used any similar
+situation, e.g. when you remove/insert a detachable touchpad. It can be
+used to stop, start, or restart `libinput-gestures` on any D-Bus event.
 
 ### TROUBLESHOOTING
 
@@ -334,6 +340,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
 Public License at <https://www.gnu.org/licenses/> for more details.
 
 [REPO]: https://github.com/bulletmark/libinput-gestures/
+[DBUS]: https://github.com/bulletmark/dbus-action/
 [AUR]: https://aur.archlinux.org/packages/libinput-gestures/
 [XDOTOOL]: https://www.semicomplete.com/projects/xdotool/
 
