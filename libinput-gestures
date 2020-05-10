@@ -11,7 +11,6 @@ import getpass
 import fcntl
 import platform
 import math
-import signal
 from time import monotonic
 from collections import OrderedDict
 from pathlib import Path
@@ -63,7 +62,7 @@ def run(cmd, *, check=True, block=True):
             result = subprocess.check_output(cmd, universal_newlines=True,
                     stderr=(None if check else subprocess.DEVNULL))
         else:
-            result = subprocess.Popen(cmd)
+            result = bool(subprocess.Popen(cmd))
     except Exception as e:
         result = None
         if check:
@@ -710,9 +709,6 @@ def main():
 
     cmd = subprocess.Popen(shlex.split(command), stdout=subprocess.PIPE,
             bufsize=1, universal_newlines=True)
-
-    # Avoid producing zombie processes
-    signal.signal(signal.SIGCHLD, signal.SIG_IGN)
 
     # Sit in a loop forever reading the libinput messages ..
     handler = None
