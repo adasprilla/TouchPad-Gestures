@@ -11,6 +11,7 @@ import getpass
 import fcntl
 import platform
 import math
+import hashlib
 from time import monotonic
 from collections import OrderedDict
 from pathlib import Path
@@ -278,7 +279,7 @@ class COMMAND_internal(COMMAND):
             stdout = '0 *\n1 -'
 
         # Parse the output of above command
-        lines = [l.split(maxsplit=2)[1] for l in stdout.strip().splitlines()]
+        lines = [ln.split(maxsplit=2)[1] for ln in stdout.strip().splitlines()]
         start = index = lines.index('*')
         num = len(lines)
         cols = self.cols or num // self.rows
@@ -648,8 +649,7 @@ def main():
             platform.python_version(), libvers))
 
         # Output hash version/checksum of this program
-        vers = run(('md5sum', str(PROGPATH)), check=False)
-        vers = str(vers.split()[0]) if vers else '?'
+        vers = hashlib.md5(PROGPATH.read_bytes()).hexdigest()
         print('{}: hash {}'.format(PROGPATH, vers))
 
     # Read and process the conf file
