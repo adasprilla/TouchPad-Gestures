@@ -108,7 +108,7 @@ def get_device_info(name, cmd_list_devices, device_list):
 
     if not devices:
         print('Can not see any devices, did you add yourself to the '
-                'input group and log out/in?', file=sys.stderr)
+                'input group and reboot?', file=sys.stderr)
         return None
 
     # If a specific device name was asked for then return that device
@@ -702,7 +702,7 @@ def main():
     # Set up square of swipe threshold
     abzsquare = swipe_min_threshold**2
 
-    # Note your must "sudo gpasswd -a $USER input" then log out/in for
+    # Note your must "sudo gpasswd -a $USER input" then reboot for
     # permission to access the device.
     devstr = ' --device {}'.format(device.get('_path')) if device else ''
     command = 'stdbuf -oL -- {}{}'.format(cmd_debug_events, devstr)
