@@ -216,6 +216,7 @@ class COMMAND_internal(COMMAND):
 
     commands_list = [c[0] for c in commands]
 
+    CMDTEST = 'wmctrl -m'.split()
     CMDLIST = 'wmctrl -d'.split()
     CMDSET = 'wmctrl -s'.split()
 
@@ -238,6 +239,13 @@ class COMMAND_internal(COMMAND):
         self.rows = 0
         self.cols = 0
         cmdi = self.commands_list.index(args.action)
+
+        if self.CMDTEST[0] and not run(self.CMDTEST, check=False):
+            print('Warning: must install {} to use _internal command.'.format(
+                self.CMDTEST[0]), file=sys.stderr)
+
+        # Only do above check once
+        self.CMDTEST[0] = ''
 
         if cmdi >= 2:
             if args.row or args.col:
