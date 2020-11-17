@@ -29,27 +29,36 @@ https://github.com/bulletmark/libinput-gestures.
 
 ### INSTALLATION
 
-IMPORTANT: You must be a member of the _input_ group to have permission
+You need python 3.5 or later, python2 is not supported. You also need
+libinput release 1.0 or later.
+
+You **must be a member of the _input_ group** to have permission
 to read the touchpad device:
 
     sudo gpasswd -a $USER input
 
 After executing the above command, reboot your system.
 
-NOTE: Arch users can just install [_libinput-gestures from the
-AUR_][AUR]. Then skip to the next CONFIGURATION section.
+Most/many users will require to install the following although neither are
+actual dependencies because some custom configurations will not require
+them. If you are unsure initially, install both of them.
 
-You need python 3.5 or later, python2 is not supported. You also need
-libinput release 1.0 or later. Install prerequisites:
+|Prerequisite|Required for |
+|------------|-------------|
+|`wmctrl`    |Necessary for `_internal` command, as per default configuration|
+|`xdotool`   |Simulates keyboard and mouse actions for Xorg or XWayland based apps|
 
     # E.g. On Arch:
-    sudo pacman -S xdotool wmctrl
+    sudo pacman -S wmctrl xdotool
 
     # E.g. On Debian based systems, e.g. Ubuntu:
-    sudo apt-get install xdotool wmctrl
+    sudo apt-get install wmctrl xdotool
 
     # E.g. On Fedora:
-    sudo dnf install xdotool wmctrl
+    sudo dnf install wmctrl xdotool
+
+NOTE: Arch users can now just install [_libinput-gestures from the
+AUR_][AUR]. Then skip to the next CONFIGURATION section.
 
 Debian and Ubuntu users may also need to install `libinput-tools` if
 that package exists in your release:
@@ -192,21 +201,21 @@ repository, and try again.
 
 ### WAYLAND AND OTHER NOTES
 
-This utility exploits `xdotool` which unfortunately only works with
-X11/Xorg based applications. So `xdotool` shortcuts for the desktop do
-not work under GNOME on Wayland which is the default since GNOME
-3.22. However, it is found that `wmctrl` desktop selection commands do work
-under GNOME on Wayland (via XWayland) so this utility adds a built-in
-`_internal` command which can be used to switch workspaces using the
-swipe commands.
-The `_internal` `ws_up` and `ws_down` commands use `wmctrl` to work out
-the current workspace and select the next one. Since this works on both
-Wayland and Xorg, and with GNOME, KDE, and other EWMH compliant
-desktops, it is the default configuration command for swipe up and
-down commands in `libinput-gestures.conf`. See the comments in that file
-about other options you can do with the `_internal` command.
-Unfortunately `_internal` does not work with Compiz for Ubuntu
-Unity desktop so also see the explicit example there for Unity.
+This utility exploits `xdotool` for many use cases which unfortunately
+only works with X11/Xorg based applications. So `xdotool` shortcuts for
+the desktop do not work under GNOME on Wayland which is the default
+since GNOME 3.22. However, it is found that `wmctrl` desktop selection
+commands do work under GNOME on Wayland (via XWayland) so this utility
+adds a built-in `_internal` command which can be used to switch
+workspaces using the swipe commands. The `_internal` `ws_up` and
+`ws_down` commands use `wmctrl` to work out the current workspace and
+select the next one. Since this works on both Wayland and Xorg, and with
+GNOME, KDE, and other EWMH compliant desktops, it is the default
+configuration command for swipe up and down commands in
+`libinput-gestures.conf`. See the comments in that file about other
+options you can do with the `_internal` command. Unfortunately
+`_internal` does not work with Compiz for Ubuntu Unity desktop so also
+see the explicit example there for Unity.
 
 Of course, `xdotool` commands do work via XWayland for Xorg based apps
 so, for example, page forward/back swipe gestures do work for Firefox
