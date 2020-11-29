@@ -356,9 +356,6 @@ class GESTURE:
         self.name = type(self).__name__
         self.motions = OrderedDict()
         self.has_extended = False
-        self.SUPPORTED_FINGERS = set(self.SUPPORTED_FINGERS)
-        self.has_fingers = {k: set() for k in self.SUPPORTED_MOTIONS}
-        self.all_fingers = {k: False for k in self.SUPPORTED_MOTIONS}
 
     def add(self, motion, fingers, command):
         'Add a configured motion command for this gesture'
@@ -366,20 +363,6 @@ class GESTURE:
             return 'Gesture {} does not support motion "{}".\n' \
                     'Must be "{}"'.format(self.name.lower(), motion,
                             '" or "'.join(self.SUPPORTED_MOTIONS))
-
-        # Check finger count is supported for this motion and not
-        # already configured
-        if fingers:
-            if fingers not in self.SUPPORTED_FINGERS:
-                return 'Finger count {} not supported'.format(fingers)
-            if fingers in self.has_fingers[motion]:
-                return 'Finger count {} already configured'.format(fingers)
-            self.has_fingers[motion].add(fingers)
-        else:
-            if self.all_fingers[motion]:
-                return 'Gesture already configured'
-            self.all_fingers[motion] = True
-
         if not command:
             return 'No command configured'
 
@@ -404,16 +387,9 @@ class GESTURE:
 
         return None
 
-    def check(self):
-        'Called after all config read at startup to check for duplication'
-        for m, is_set in self.all_fingers.items():
-            if is_set and self.has_fingers[m] == self.SUPPORTED_FINGERS:
-                return 'gesture {} {}: all finger actions duplicated'.format(
-                        self.name.lower(), m)
-
     def begin(self, fingers):
         'Initialise this gesture at the start of motion'
-        self.fingers = int(fingers)
+        self.fingers = fingers
         self.data = [0.0, 0.0]
         self.starttime = monotonic()
 
@@ -439,7 +415,6 @@ class GESTURE:
 @add_gesture_handler
 class SWIPE(GESTURE):
     'Class to handle this type of gesture'
-    SUPPORTED_FINGERS = (3, 4)
     SUPPORTED_MOTIONS = ('left', 'right', 'up', 'down',
             'left_up', 'right_up', 'left_down', 'right_down')
     extended_text = '_'
@@ -484,7 +459,6 @@ class SWIPE(GESTURE):
 @add_gesture_handler
 class PINCH(GESTURE):
     'Class to handle this type of gesture'
-    SUPPORTED_FINGERS = (2, 3, 4)
     SUPPORTED_MOTIONS = ('in', 'out', 'clockwise', 'anticlockwise')
     extended_text = 'clock'
 
@@ -538,7 +512,6 @@ def conf_gesture(lineargs):
     fingers, *fcommand = command.split(maxsplit=1)
     if fingers.isdigit() and len(fingers) == 1:
         command = fcommand[0] if fcommand else ''
-        fingers = int(fingers)
     else:
         fingers = None
 
@@ -634,13 +607,6 @@ def read_conf(conffile, defname):
 
     # Read and process the conf file
     get_conf(confpath, confname)
-
-    # Sanity check configuration
-    for h in handlers.values():
-        errmsg = h.check()
-        if errmsg:
-            sys.exit('Error in file {}:\n{}.'.format(confname, errmsg))
-
     return confname
 
 def main():
