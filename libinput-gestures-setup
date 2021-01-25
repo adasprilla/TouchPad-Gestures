@@ -49,7 +49,7 @@ cmd="$1"
 launch() {
     local app="$1"
     local fullpath="$APPDIR/$app.desktop"
-    local binpath="$APPBIN/$app"
+    local binpath="$BINDIR/$app"
 
     # All the commands we will potentially try ..
     local cmds=(
