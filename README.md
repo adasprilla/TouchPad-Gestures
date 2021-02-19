@@ -186,6 +186,28 @@ invoke libinput-gestures.desktop_. If you get this error message,
 install the dex package, preferably from your system packages
 repository, and try again.
 
+#### ALTERNATIVE TO START AS SYSTEMD USER SERVICE
+
+If you prefer to start the application as a [systemd user
+service](https://wiki.archlinux.org/index.php/Systemd/User) rather than
+as a desktop application started by your DE, you can use the following
+commands:
+
+To start the application immediately in the background, instead of
+`libinput-gestures-setup start` as in the previous section, do the
+following:
+
+    libinput-gestures-setup start-service
+
+To enable the app to start automatically in the background when you log
+in to your DE, instead of `libinput-gestures-setup autostart` as in the
+previous section, do the following:
+
+    libinput-gestures-setup autostart-service
+
+The other commands described in the previous section work also with the
+systemd user service.
+
 ### UPGRADE
 
     # cd to source dir, as above
