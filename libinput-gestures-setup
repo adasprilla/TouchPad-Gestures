@@ -15,12 +15,13 @@ DOCDIR="/usr/share/doc/$NAME"
 CNFDIR="/etc"
 HCFDIR="${XDG_CONFIG_HOME:-$HOME/.config}"
 AUTDIR="$HCFDIR/autostart"
+SVCFLG="$HOME/.$NAME-service"
 
 usage() {
     echo "Usage:"
     echo "As root: sudo $PROG install|uninstall"
-    echo "As user: $PROG start|stop|restart|autostart|autostop|status|"
-    echo "         start-service|autostart-service"
+    echo "As user: $PROG service|desktop|"
+    echo "         start|stop|restart|autostart|autostop|status"
     echo
     echo "-d <dir> (option sets DESTDIR for install/uninstall)"
     echo "-r (force allow root to perform user commands. PLEASE AVOID USING THIS!)"
@@ -114,22 +115,37 @@ user_action() {
     local svc_enabled="$3"
     local svc_running="$4"
 
-    if [[ $cmd == start ]]; then
-	if [[ $svc_running == running ]]; then
-	    echo "Already running as a service."
+    if [[ $cmd == service ]]; then
+	if [[ $has_sysd -eq 0 ]]; then
+	    echo "Systemd not available, can not run as service."
 	    exit 1
 	fi
-	if [[ ! -f $APPDIR/$NAME.desktop ]]; then
-	    echo "$NAME is not installed."
-	    exit 1
-	fi
-	if de_start "$NAME"; then
-	    echo "$NAME started for desktop."
+	touch $SVCFLG
+	rm -fv $AUTDIR/$NAME.desktop
+    elif [[ $cmd == desktop ]]; then
+	rm -f $SVCFLG
+    elif [[ $cmd == start ]]; then
+	if [[ -f $SVCFLG ]]; then
+	    if [[ $has_sysd -eq 0 ]]; then
+		echo "Systemd is not installed."
+		exit 1
+	    fi
+	    if systemctl --user start $NAME.service; then
+		echo "$NAME started as a user service."
+	    fi
+	else
+	    if [[ ! -f $APPDIR/$NAME.desktop ]]; then
+		echo "$NAME is not installed."
+		exit 1
+	    fi
+	    if de_start "$NAME"; then
+		echo "$NAME started for desktop."
+	    fi
 	fi
     elif [[ $cmd == stop ]]; then
 	if [[ $svc_running == running ]]; then
 	    systemctl --user stop $NAME.service
-	    echo "$NAME stopped as user service."
+	    echo "$NAME stopped as a user service."
 	fi
 
 	for prog in libinput-debug-events $NAME; do
@@ -137,30 +153,24 @@ user_action() {
 		echo "$prog stopped for desktop."
 	    fi
 	done
-    elif [[ $cmd == start-service ]]; then
-	if [[ $has_sysd -eq 0 ]]; then
-	    echo "Systemd is not installed."
-	    exit 1
-	fi
-	if systemctl --user start $NAME.service; then
-	    echo "$NAME started as user service."
-	fi
-    elif [[ $cmd == autostart-service ]]; then
-	if [[ $has_sysd -eq 0 ]]; then
-	    echo "Systemd is not installed."
-	    exit 1
-	fi
-	if systemctl --user enable $NAME.service; then
-	    echo "$NAME enabled as user service."
-	fi
-	rm -fv $AUTDIR/$NAME.desktop
     elif [[ $cmd == autostart ]]; then
-	if ! de_auto_start; then
-	    echo "$NAME is not installed."
-	    exit 1
-	fi
-	if [[ $has_sysd -eq 1 ]]; then
-	    systemctl --user disable $NAME.service &>/dev/null
+	if [[ -f $SVCFLG ]]; then
+	    if [[ $has_sysd -eq 0 ]]; then
+		echo "Systemd is not installed."
+		exit 1
+	    fi
+	    if systemctl --user enable $NAME.service; then
+		echo "$NAME enabled as a user service."
+	    fi
+	    rm -fv $AUTDIR/$NAME.desktop
+	else
+	    if ! de_auto_start; then
+		echo "$NAME is not installed."
+		exit 1
+	    fi
+	    if [[ $has_sysd -eq 1 ]]; then
+		systemctl --user disable $NAME.service &>/dev/null
+	    fi
 	fi
     elif [[ $cmd == autostop ]]; then
 	if [[ $has_sysd -eq 1 ]]; then
@@ -174,37 +184,31 @@ user_action() {
 	    echo "$NAME is not installed."
 	fi
 
-	if [[ $svc_enabled == enabled ]]; then
-	    echo "$NAME is set to autostart as user service."
+	if [[ -f $SVCFLG ]]; then
+	    echo "$NAME is set up as a user service."
 	else
-	    echo "$NAME is not set to autostart as user service."
+	    echo "$NAME is set up as a desktop application."
 	fi
 
-	if [[ -f $AUTDIR/$NAME.desktop ]]; then
-	    echo "$NAME is set to autostart as desktop application."
-	else
-	    echo "$NAME is not set to autostart as desktop application."
-	fi
-
-	local svc=0
-	local de=0
 	if [[ $svc_running == running ]]; then
-	    echo "$NAME is running as user service."
-	    svc=1
+	    echo "$NAME is currently running as a user service."
 	else
-	    echo "$NAME is not running as user service."
-	    svc=0
-	fi
-
-	if [[ $svc -eq 0 ]]; then
 	    if pgrep -u $USER -f "$NAME\$|$NAME " &>/dev/null; then
-		echo "$NAME is running as desktop application."
-		de=1
+		echo "$NAME is currently running as a desktop application."
+	    else
+		echo "$NAME is not currently running."
 	    fi
 	fi
 
-	if [[ $de -eq 0 ]]; then
-	    echo "$NAME is not running as desktop application."
+	if [[ $svc_enabled == enabled ]]; then
+	    echo "$NAME is set to autostart as a user service."
+	    rm -fv $AUTDIR/$NAME.desktop
+	else
+	    if [[ -f $AUTDIR/$NAME.desktop ]]; then
+		echo "$NAME is set to autostart as a desktop application."
+	    else
+		echo "$NAME is not set to autostart."
+	    fi
 	fi
 
 	if [[ -f $HCFDIR/$NAME.conf ]]; then
@@ -289,13 +293,8 @@ else
     fi
 
     if [[ $cmd == restart ]]; then
-	if [[ $svc_enabled == enabled || $svc_running == running ]]; then
-	    cmd=start-service
-	else
-	    cmd=start
-	fi
-
 	user_action "stop" $has_sysd $svc_enabled $svc_running
+	cmd=start
     fi
 
     user_action $cmd $has_sysd $svc_enabled $svc_running
