@@ -15,7 +15,7 @@ DOCDIR="/usr/share/doc/$NAME"
 CNFDIR="/etc"
 HCFDIR="${XDG_CONFIG_HOME:-$HOME/.config}"
 AUTDIR="$HCFDIR/autostart"
-SVCFLG="$HOME/.$NAME-service"
+SVCFLG="$HCFDIR/$NAME-is-service"
 
 usage() {
     echo "Usage:"
@@ -120,7 +120,8 @@ user_action() {
 	    echo "Systemd not available, can not run as service."
 	    exit 1
 	fi
-	touch $SVCFLG
+	mkdir -p "$(dirname $SVCFLG)"
+	echo "# This file created by \"$NAME-setup $cmd\" command." >$SVCFLG
 	rm -fv $AUTDIR/$NAME.desktop
     elif [[ $cmd == desktop ]]; then
 	rm -f $SVCFLG
