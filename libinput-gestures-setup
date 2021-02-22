@@ -15,7 +15,7 @@ DOCDIR="/usr/share/doc/$NAME"
 CNFDIR="/etc"
 HCFDIR="${XDG_CONFIG_HOME:-$HOME/.config}"
 AUTDIR="$HCFDIR/autostart"
-SVCFLG="$HCFDIR/$NAME-is-service"
+SVCFLG="$HCFDIR/.$NAME-is-service"
 
 usage() {
     echo "Usage:"
