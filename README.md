@@ -317,7 +317,10 @@ configuration you are using, regardless of what the issue is about**.
 3. Perhaps temporarily remove your custom configuration to try with the
    default configuration.
 
-4. Run `libinput-gestures` on the command line in debug mode while
+4. Run `libinput-gestures-setup status` and confirm it reports the set
+   up that you expect.
+
+5. Run `libinput-gestures` on the command line in debug mode while
    performing some 3 and 4 finger left/right/up/down swipes, and some
    pinch in/outs. In debug mode, configured commands are not executed,
    they are merely output to the screen:
@@ -327,7 +330,7 @@ configuration you are using, regardless of what the issue is about**.
 	(<ctrl-c> to stop)
    ````
 
-5. Run `libinput-gestures` in raw mode by repeating the same commands as
+6. Run `libinput-gestures` in raw mode by repeating the same commands as
    above step but use the `-r` (`--raw`) switch instead of `-d`
    (`--debug`). Raw mode does nothing more than echo the raw gesture
    events received from `libinput debug-events`. If you see `POINTER_*`
@@ -338,11 +341,11 @@ configuration you are using, regardless of what the issue is about**.
    is done completely within libinput, before they get to
    `libinput-gestures`.
 
-6. Search the web for Linux kernel and/or libinput issues relating to
+7. Search the web for Linux kernel and/or libinput issues relating to
    your specific touchpad device and/or laptop/pc. Update your BIOS if
    possible.
 
-7. Be sure that a configured external command works exactly how you want
+8. Be sure that a configured external command works exactly how you want
    when you run it directly on the command line, **before** you configure
    it for `libinput-gestures`. E.g. run `xdotool` manually and
    experiment with various arguments to work out exactly what arguments
@@ -352,7 +355,7 @@ configuration you are using, regardless of what the issue is about**.
    `xdotool` command does not work correctly then there is no point
    raising an `libinput-gestures` issue about it!
 
-8. **If you raise an issue, always include the output of
+9. **If you raise an issue, always include the output of
    `libinput-gestures -l` to show the environment and configuration you
    are using**. If appropriate, also paste the output from steps 4 and 5
    above. If your device is not being recognised by `libinput-gestures`
