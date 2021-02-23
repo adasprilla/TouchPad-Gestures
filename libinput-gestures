@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 'Read gestures from libinput touchpad and action shell commands.'
-# Mark Blakeney, Sep 2015
+# Mark Blakeney, Sep 2015.
 import os
 import sys
 import argparse
