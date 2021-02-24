@@ -288,7 +288,7 @@ else
 	svc_enabled=$(systemctl --user show -P UnitFileState $NAME.service)
 	svc_running=$(systemctl --user show -P SubState $NAME.service)
     else
-	has_sysd=1
+	has_sysd=0
 	svc_enabled="no"
 	svc_running="no"
     fi
