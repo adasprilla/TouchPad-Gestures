@@ -144,7 +144,7 @@ user_action() {
 	    fi
 	fi
     elif [[ $cmd == stop ]]; then
-	if [[ $svc_running == running ]]; then
+	if [[ $svc_running -eq 1 ]]; then
 	    systemctl --user stop $NAME.service
 	    echo "$NAME stopped as a user service."
 	fi
@@ -191,7 +191,7 @@ user_action() {
 	    echo "$NAME is set up as a desktop application."
 	fi
 
-	if [[ $svc_running == running ]]; then
+	if [[ $svc_running -eq 1 ]]; then
 	    echo "$NAME is currently running as a user service."
 	else
 	    if pgrep -u $USER -f "$NAME\$|$NAME " &>/dev/null; then
@@ -201,7 +201,7 @@ user_action() {
 	    fi
 	fi
 
-	if [[ $svc_enabled == enabled ]]; then
+	if [[ $svc_enabled -eq 1 ]]; then
 	    echo "$NAME is set to autostart as a user service."
 	    rm -fv $AUTDIR/$NAME.desktop
 	else
@@ -219,6 +219,15 @@ user_action() {
 	fi
     else
 	usage
+    fi
+}
+
+# Test if given systemd property is set for service
+sysd_prop() {
+    if systemctl --user show -p $1 $NAME.service | grep -q "=$2$"; then
+	echo 1
+    else
+	echo 0
     fi
 }
 
@@ -285,12 +294,12 @@ else
     # Test if systemd is installed
     if type systemctl &>/dev/null; then
 	has_sysd=1
-	svc_enabled=$(systemctl --user show -P UnitFileState $NAME.service)
-	svc_running=$(systemctl --user show -P SubState $NAME.service)
+	svc_enabled=$(sysd_prop UnitFileState enabled)
+	svc_running=$(sysd_prop SubState running)
     else
 	has_sysd=0
-	svc_enabled="no"
-	svc_running="no"
+	svc_enabled=0
+	svc_running=0
     fi
 
     if [[ $cmd == restart ]]; then
