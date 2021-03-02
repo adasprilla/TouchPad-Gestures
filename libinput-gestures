@@ -12,10 +12,21 @@ import fcntl
 import platform
 import math
 import hashlib
+import threading
 from time import monotonic
 from collections import OrderedDict
 from pathlib import Path
 from distutils.version import LooseVersion as Version
+
+dbus_imported = True
+try:
+    import dbus
+    from dbus.mainloop.glib import DBusGMainLoop
+    from gi.repository import GLib
+except ImportError:
+    dbus_imported = False
+
+session_locked = False
 
 PROGPATH = Path(sys.argv[0])
 PROGNAME = PROGPATH.stem
@@ -609,6 +620,25 @@ def read_conf(conffile, defname):
     get_conf(confpath, confname)
     return confname
 
+def lockcheck():
+    'Listen on DBus to set session_locked state'
+    def proc(busname, vals, _):
+        global session_locked
+        if busname == 'org.freedesktop.login1.Session':
+            val = vals.get('LockedHint')
+            if val is not None:
+                session_locked = bool(val)
+
+    DBusGMainLoop(set_as_default=True)
+    dbus.SystemBus().add_signal_receiver(
+        proc,
+        'PropertiesChanged',
+        'org.freedesktop.DBus.Properties',
+        'org.freedesktop.login1',
+    )
+
+    GLib.MainLoop().run()
+
 def main():
     global args, abzsquare
 
@@ -715,12 +745,21 @@ def main():
     devstr = ' --device {}'.format(device.get('_path')) if device else ''
     command = 'stdbuf -oL -- {}{}'.format(cmd_debug_events, devstr)
 
+    if dbus_imported:
+        t = threading.Thread(target=lockcheck)
+        t.daemon = True
+        t.start()
+
     cmd = subprocess.Popen(shlex.split(command), stdout=subprocess.PIPE,
             bufsize=1, universal_newlines=True)
 
     # Sit in a loop forever reading the libinput messages ..
     handler = None
     for line in cmd.stdout:
+
+        # Ignore gestures if this session is locked
+        if session_locked:
+            continue
 
         # Just output raw messages if in that mode
         if args.raw:
