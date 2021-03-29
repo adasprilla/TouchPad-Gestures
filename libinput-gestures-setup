@@ -125,6 +125,9 @@ user_action() {
 	rm -fv $AUTDIR/$NAME.desktop
     elif [[ $cmd == desktop ]]; then
 	rm -f $SVCFLG
+	if [[ $has_sysd -eq 1 ]]; then
+	    systemctl --user disable $NAME.service &>/dev/null
+	fi
     elif [[ $cmd == start ]]; then
 	if [[ -f $SVCFLG ]]; then
 	    if [[ $has_sysd -eq 0 ]]; then
