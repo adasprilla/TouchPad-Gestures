@@ -247,17 +247,24 @@ so, for example, page forward/back swipe gestures do work for Firefox
 and Chrome browsers when running on Wayland as per the default
 configuration.
 
-Note that GNOME on Wayland natively implements the following gestures:
+Note if you run `libinput-gestures` on GNOME with Wayland, be sure to
+change or disable the your `libinput-gestures.conf` configured gestures
+to not clash with the native gestures.
+
+GNOME 40.0 and later on Wayland natively implements the following
+gestures:
+
+- 3 finger swipe up/down opens the GNOME overview.
+- 3 finger swipe left/right changes workspaces
+
+GNOME 40.0 does not use 4 finger gestures so you can freely assign them
+using libinput-gestures.
+
+GNOME 3.38 on Wayland and earlier natively implements the following
+gestures:
 
 - 3 finger pinch opens/close the GNOME overview.
-- 4 finger swipe up/down changes workspaces.
-
-So if you choose to run `libinput-gestures` on Wayland, be sure to
-change or disable the your `libinput-gestures.conf` pinch and swipe
-up/down gestures to not clash with these. E.g, configure your
-`libinput-gestures.conf` pinch gestures for only 2 fingers, and the
-swipe up/down for only 3 fingers so they work independently of the
-native gestures.
+- 4 finger swipe up/down changes workspaces
 
 GNOME on Xorg does not natively implement any gestures.
 

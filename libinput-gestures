@@ -753,6 +753,10 @@ def main():
     cmd = subprocess.Popen(shlex.split(command), stdout=subprocess.PIPE,
             bufsize=1, universal_newlines=True)
 
+    # Store PIDs for potential kill
+    proglock.write('{}\n{}\n'.format(os.getpid(), cmd.pid))
+    proglock.flush()
+
     # Sit in a loop forever reading the libinput messages ..
     handler = None
     for line in cmd.stdout:
