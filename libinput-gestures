@@ -735,7 +735,7 @@ def main():
     if args.list:
         status = run((PROGNAME + '-setup', 'status'), check=False)
         if status:
-            print(status)
+            print(status.strip())
         sys.exit()
 
     # Make sure only one instance running for current user
