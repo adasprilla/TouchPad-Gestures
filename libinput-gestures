@@ -639,6 +639,12 @@ def lockcheck():
 
     GLib.MainLoop().run()
 
+def gethash():
+    'Return a crude hash identifier for this software version'
+    progs = (PROGPATH, PROGPATH.with_name(PROGNAME + '-setup'))
+    return hashlib.md5(b''.join(p.read_bytes() for p in progs if
+        p.exists())).hexdigest()
+
 def main():
     global args, abzsquare
 
@@ -687,8 +693,7 @@ def main():
             platform.python_version(), libvers))
 
         # Output hash version/checksum of this program
-        vers = hashlib.md5(PROGPATH.read_bytes()).hexdigest()
-        print('{}: hash {}'.format(PROGPATH, vers))
+        print('Hash: {}'.format(gethash()))
 
     # Read and process the conf file
     confname = read_conf(args.conffile, CONFNAME)
@@ -728,6 +733,9 @@ def main():
 
     # If just called to list out above environment info then exit now
     if args.list:
+        status = run((PROGNAME + '-setup', 'status'), check=False)
+        if status:
+            print(status)
         sys.exit()
 
     # Make sure only one instance running for current user
