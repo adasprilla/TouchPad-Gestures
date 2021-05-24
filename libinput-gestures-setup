@@ -16,6 +16,7 @@ CNFDIR="/etc"
 HCFDIR="${XDG_CONFIG_HOME:-$HOME/.config}"
 AUTDIR="$HCFDIR/autostart"
 SVCFLG="$HCFDIR/.$NAME-is-service"
+CHECKSECS=6
 
 usage() {
     echo "Usage:"
@@ -114,6 +115,7 @@ user_action() {
     local has_sysd="$2"
     local svc_enabled="$3"
     local svc_running="$4"
+    local pidfile=/tmp/$NAME-$USER.pid
 
     if [[ $cmd == service ]]; then
 	if [[ $has_sysd -eq 0 ]]; then
@@ -129,13 +131,14 @@ user_action() {
 	    systemctl --user disable $NAME.service &>/dev/null
 	fi
     elif [[ $cmd == start ]]; then
+	STARTBY=""
 	if [[ -f $SVCFLG ]]; then
 	    if [[ $has_sysd -eq 0 ]]; then
 		echo "Systemd is not installed."
 		exit 1
 	    fi
 	    if systemctl --user start $NAME.service; then
-		echo "$NAME started as a user service."
+		STARTBY="as a user service"
 	    fi
 	else
 	    if [[ ! -f $APPDIR/$NAME.desktop ]]; then
@@ -143,15 +146,33 @@ user_action() {
 		exit 1
 	    fi
 	    if de_start "$NAME"; then
-		echo "$NAME started for desktop."
+		STARTBY="by desktop"
+	    fi
+	fi
+
+	# Wait some time to start ..
+	if [[ -n $STARTBY ]]; then
+	    done=0
+	    for c in $(seq $CHECKSECS); do
+		sleep 1
+		if ps "$(head -1 $pidfile 2>/dev/null)" &>/dev/null; then
+		    done=1
+		    break
+		fi
+	    done
+
+	    if [[ $done -eq 1 ]]; then
+		echo "$NAME started $STARTBY".
+	    else
+		echo "$NAME failed to start $STARTBY". >&2
 	    fi
 	fi
     elif [[ $cmd == stop ]]; then
+	STARTBY=""
 	if [[ $svc_running -eq 1 ]]; then
 	    systemctl --user stop $NAME.service
-	    echo "$NAME stopped as a user service."
+	    STARTBY="user service"
 	else
-	    local pidfile=/tmp/$NAME-$USER.lock
 	    if [[ -f $pidfile ]]; then
 		local killed=0
 		while read pid; do
@@ -160,8 +181,26 @@ user_action() {
 		    fi
 		done <$pidfile
 		if [[ $killed -ne 0 ]]; then
-		    echo "$NAME stopped for desktop."
+		    STARTBY="for desktop"
 		fi
+	    fi
+	fi
+
+	if [[ -n $STARTBY ]]; then
+	    # Wait some time to stop ..
+	    done=0
+	    for c in $(seq $CHECKSECS); do
+		sleep 1
+		if ! ps "$(head -1 $pidfile 2>/dev/null)" &>/dev/null; then
+		    done=1
+		    break
+		fi
+	    done
+
+	    if [[ $done -eq 1 ]]; then
+		echo "$NAME stopped $STARTBY".
+	    else
+		echo "$NAME failed to stop $STARTBY". >&2
 	    fi
 	fi
     elif [[ $cmd == autostart ]]; then
@@ -203,7 +242,7 @@ user_action() {
 
 	if [[ $svc_running -eq 1 ]]; then
 	    echo "$NAME is currently running as a user service."
-	elif ps "$(head -1 /tmp/$NAME-$USER.lock 2>/dev/null)" &>/dev/null; then
+	elif ps "$(head -1 $pidfile 2>/dev/null)" &>/dev/null; then
 	    echo "$NAME is currently running as a desktop application."
 	else
 	    echo "$NAME is not currently running."

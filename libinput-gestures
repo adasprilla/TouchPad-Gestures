@@ -57,15 +57,17 @@ timeoutv = DEFAULT_TIMEOUT
 ROTATE_ANGLE = 15.0
 
 def open_lock(*args):
-    'Create a lock based on given list of arguments'
+    'Create lock/pid files based on given list of arguments'
     # We use exclusive assess to a file for this
-    fp = Path('/tmp', '-'.join(args) + '.lock').open('w')
+    fname = Path('/tmp', '-'.join(args))
+    flock = fname.with_suffix('.lock').open('w')
     try:
-        fcntl.lockf(fp, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        fcntl.lockf(flock, fcntl.LOCK_EX | fcntl.LOCK_NB)
     except IOError:
-        return None
+        return None, None
 
-    return fp
+    fpid = fname.with_suffix('.pid').open('w')
+    return flock, fpid
 
 def run(cmd, *, check=True, block=True):
     'Run function and return standard output, Popen() handle, or None'
@@ -740,8 +742,8 @@ def main():
 
     # Make sure only one instance running for current user
     user = getpass.getuser()
-    proglock = open_lock(PROGNAME, user)
-    if not proglock:
+    lockfile, pidfile = open_lock(PROGNAME, user)
+    if not lockfile:
         sys.exit('{} is already running for {}, terminating ..'.format(
             PROGNAME, user))
 
@@ -762,8 +764,9 @@ def main():
             bufsize=1, universal_newlines=True)
 
     # Store PIDs for potential kill
-    proglock.write('{}\n{}\n'.format(os.getpid(), cmd.pid))
-    proglock.flush()
+    pidfile.write('{}\n{}\n'.format(os.getpid(), cmd.pid))
+    pidfile.flush()
+    os.fsync(pidfile.fileno())
 
     # Sit in a loop forever reading the libinput messages ..
     handler = None
