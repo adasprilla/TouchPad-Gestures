@@ -78,8 +78,7 @@ calls gestures](https://wayland.freedesktop.org/libinput/doc/latest/gestures.htm
 Many users will be happy with the default configuration in which case
 you can just type the following and you are ready to go:
 
-    libinput-gestures-setup autostart
-    libinput-gestures-setup start
+    libinput-gestures-setup service autostart start
 
 Otherwise, if you want to create your own custom gestures etc, keep
 reading ..
@@ -177,7 +176,7 @@ libinput-gestures-setup service
 libinput-gestures-setup desktop
 ````
 
-After *choosing one of the above*, you can use then run the following commands:
+After choosing one of the above, you can use then run the following commands:
 
 Enable the app to start automatically in the background when you
 log in with:
@@ -204,6 +203,12 @@ Check the status of the app with:
 
     libinput-gestures-setup status
 
+You can specify multiple commands to `libinput-gestures-setup` to action
+in sequence. E.g. to change from a running desktop application to a
+running `systemd` user service type:
+
+    libinput-gestures-setup stop service autostart start
+
 Note if you are starting using the DE option and you are using some
 uncommon systems then `libinput-gestures-setup start` may fail
 to start the application returning you a message _Don't know how to
@@ -220,8 +225,7 @@ repository, and try again.
 
 ### REMOVAL
 
-    libinput-gestures-setup stop
-    libinput-gestures-setup autostop
+    libinput-gestures-setup stop autostop
     sudo libinput-gestures-setup uninstall
 
 ### WAYLAND AND OTHER NOTES
