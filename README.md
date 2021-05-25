@@ -22,7 +22,7 @@ on Xorg and Wayland. It works somewhat incompletely on Wayland (via
 XWayland). See the WAYLAND section below and the comments in the default
 `libinput-gestures.conf` file. It has been [reported to work with
 KDE](http://www.lorenzobettini.it/2017/02/touchpad-gestures-in-linux-kde-with-libinput-gestures/).
-I am not sure how well this will work on all distros and DE's etc.
+I am not sure how well this will work on all Linux systems and DE's etc.
 
 The latest version and documentation is available at
 https://github.com/bulletmark/libinput-gestures.
@@ -78,7 +78,7 @@ calls gestures](https://wayland.freedesktop.org/libinput/doc/latest/gestures.htm
 Many users will be happy with the default configuration in which case
 you can just type the following and you are ready to go:
 
-    libinput-gestures-setup service autostart start
+    libinput-gestures-setup autostart start
 
 Otherwise, if you want to create your own custom gestures etc, keep
 reading ..
@@ -157,10 +157,11 @@ You must choose between starting the application as a [systemd user
 service](https://wiki.archlinux.org/index.php/Systemd/User), or as a
 [desktop
 application](https://specifications.freedesktop.org/autostart-spec/autostart-spec-latest.html)
-(with an XDG compliant DE such as GNOME and KDE). The systemd user service
-option for `libinput-gestures` was added in Feb 2021 and provides more
-robust management and better logging than the desktop so is now the preferred choice.
-Choose one of the two following options:
+(with an XDG compliant DE such as GNOME and KDE). The systemd user
+service option for `libinput-gestures` was added in Feb 2021 and
+provides more robust management and better logging than the desktop so
+is the preferred choice if your system is recent and your DE supports
+it. Choose one of the two following options:
 
 1. To set up the application as a [systemd user
    service](https://wiki.archlinux.org/index.php/Systemd/User):
@@ -203,9 +204,9 @@ Check the status of the app with:
 
     libinput-gestures-setup status
 
-You can specify multiple commands to `libinput-gestures-setup` to action
-in sequence. E.g. to change from a running desktop application to a
-running `systemd` user service type:
+You can specify multiple user commands to `libinput-gestures-setup` to
+action in sequence. E.g. to change from a running desktop application to
+a running `systemd` user service type:
 
     libinput-gestures-setup stop service autostart start
 

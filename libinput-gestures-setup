@@ -41,13 +41,6 @@ done
 
 shift $((OPTIND - 1))
 
-# Test if systemd is installed
-if type systemctl &>/dev/null; then
-    HAS_SYSD=1
-else
-    HAS_SYSD=0
-fi
-
 # Test if given systemd property is set for service
 sysd_prop() {
     if systemctl --user show -p $1 $NAME.service | grep -q "=$2$"; then
@@ -219,23 +212,23 @@ user_action() {
 	    fi
 	fi
     elif [[ $cmd == autostart ]]; then
+	if [[ $HAS_SYSD -eq 1 ]]; then
+	    systemctl --user disable $NAME.service &>/dev/null
+	fi
+
 	if [[ -f $SVCFLG ]]; then
 	    if [[ $HAS_SYSD -eq 0 ]]; then
 		echo "Systemd is not installed."
 		exit 1
 	    fi
+
 	    if systemctl --user enable $NAME.service; then
 		echo "$NAME enabled as a user service."
 	    fi
 	    rm -fv $AUTDIR/$NAME.desktop
-	else
-	    if ! de_auto_start; then
-		echo "$NAME is not installed."
-		exit 1
-	    fi
-	    if [[ $HAS_SYSD -eq 1 ]]; then
-		systemctl --user disable $NAME.service &>/dev/null
-	    fi
+	elif ! de_auto_start; then
+	    echo "$NAME is not installed."
+	    exit 1
 	fi
     elif [[ $cmd == autostop ]]; then
 	if [[ $HAS_SYSD -eq 1 ]]; then
@@ -275,9 +268,9 @@ user_action() {
 	fi
 
 	if [[ -f $HCFDIR/$NAME.conf ]]; then
-	    echo "$NAME is using custom configuration."
+	    echo "$NAME is using custom configuration file."
 	else
-	    echo "$NAME is using default configuration."
+	    echo "$NAME is using default configuration file."
 	fi
     else
 	echo "ERROR: \"$cmd\" is not a valid user command" >&2
@@ -330,6 +323,13 @@ else
     if [[ $(id -un) == root ]]; then
 	echo "Non-installation commands must be run as your own user."
 	exit 1
+    fi
+
+    # Test if systemd is installed
+    if type systemctl &>/dev/null; then
+	HAS_SYSD=1
+    else
+	HAS_SYSD=0
     fi
 
     # Remove any old configuration from earlier versions of program
