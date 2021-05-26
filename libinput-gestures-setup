@@ -328,6 +328,13 @@ else
     # Test if systemd is installed
     if type systemctl &>/dev/null; then
 	HAS_SYSD=1
+	# Reload systemd if service file has been updated
+	if systemctl --user status $NAME.service 2>&1 |
+	    grep -q ' changed on disk'; then
+	    echo "$NAME.service has changed, reloading systemd user daemon .."
+	    systemctl --user daemon-reload
+	    sleep 2
+	fi
     else
 	HAS_SYSD=0
     fi
