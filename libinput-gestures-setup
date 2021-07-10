@@ -213,9 +213,9 @@ user_action() {
 	fi
     elif [[ $cmd == autostart ]]; then
 	if [[ $HAS_SYSD -eq 1 ]]; then
+	    # Be sure to remove any old systemd links ..
 	    systemctl --user disable $NAME.service &>/dev/null
 	fi
-
 	if [[ -f $SVCFLG ]]; then
 	    if [[ $HAS_SYSD -eq 0 ]]; then
 		echo "Systemd is not installed."
