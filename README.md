@@ -205,17 +205,17 @@ Check the status of the app with:
     libinput-gestures-setup status
 
 You can specify multiple user commands to `libinput-gestures-setup` to
-action in sequence. E.g. to change from a running desktop application to
-a running `systemd` user service type:
+action in sequence. E.g. to shutdown and change from a desktop
+installation to running service installation type:
 
     libinput-gestures-setup stop service autostart start
 
-Note if you are starting using the DE option and you are using some
-uncommon systems then `libinput-gestures-setup start` may fail
-to start the application returning you a message _Don't know how to
-invoke libinput-gestures.desktop_. If you get this error message,
-install the dex package, preferably from your system packages
-repository, and try again.
+Note if you are starting using the desktop option and you are using some
+uncommon systems then `libinput-gestures-setup start` may fail to start
+the application returning you a message _Don't know how to invoke
+libinput-gestures.desktop_. If you get this error message, install the
+dex package, preferably from your system packages repository, and try
+again.
 
 ### UPGRADE
 

@@ -41,9 +41,9 @@ done
 
 shift $((OPTIND - 1))
 
-# Test if given systemd property is set for service
+# Test if given systemd property is set for given unit
 sysd_prop() {
-    if systemctl --user show -p $1 $NAME.service | grep -q "=$2$"; then
+    if systemctl --user show -p "$2" "$1" 2>/dev/null | grep -q "=$3$"; then
 	echo 1
     else
 	echo 0
@@ -118,8 +118,8 @@ user_action() {
 
     # Test if systemd is enabled/running
     if [[ $HAS_SYSD -eq 1 ]]; then
-	svc_enabled=$(sysd_prop UnitFileState enabled)
-	svc_running=$(sysd_prop SubState running)
+	svc_enabled=$(sysd_prop $NAME.service UnitFileState enabled)
+	svc_running=$(sysd_prop $NAME.service SubState running)
     else
 	svc_enabled=0
 	svc_running=0
@@ -142,7 +142,7 @@ user_action() {
 	STARTAS=""
 	if [[ -f $SVCFLG ]]; then
 	    if [[ $HAS_SYSD -eq 0 ]]; then
-		echo "Systemd is not installed."
+		echo "Systemd service is not available."
 		exit 1
 	    fi
 	    if systemctl --user start $NAME.service; then
@@ -218,7 +218,7 @@ user_action() {
 	fi
 	if [[ -f $SVCFLG ]]; then
 	    if [[ $HAS_SYSD -eq 0 ]]; then
-		echo "Systemd is not installed."
+		echo "Systemd service is not available."
 		exit 1
 	    fi
 
@@ -327,7 +327,12 @@ else
 
     # Test if systemd is installed
     if type systemctl &>/dev/null; then
-	HAS_SYSD=1
+	HAS_SYSD=$(sysd_prop graphical-session.target ActiveState active)
+    else
+	HAS_SYSD=0
+    fi
+
+    if [[ $HAS_SYSD -eq 1 ]]; then
 	# Reload systemd if service file has been updated
 	if systemctl --user status $NAME.service 2>&1 |
 	    grep -q ' changed on disk'; then
@@ -335,8 +340,6 @@ else
 	    systemctl --user daemon-reload
 	    sleep 2
 	fi
-    else
-	HAS_SYSD=0
     fi
 
     # Remove any old configuration from earlier versions of program
