@@ -160,8 +160,13 @@ application](https://specifications.freedesktop.org/autostart-spec/autostart-spe
 (with an XDG compliant DE such as GNOME and KDE). The systemd user
 service option for `libinput-gestures` was added in Feb 2021 and
 provides more robust management and better logging than the desktop so
-is the preferred choice if your system is recent and your DE supports
-it. Choose one of the two following options:
+is the preferred choice if your system is recent and your DM/DE supports
+it. Note that some environments [do not correctly start the systemd
+user
+service](https://github.com/bulletmark/libinput-gestures/issues/305) so
+you will have to choose the desktop option in that case.
+
+Choose one of the two following options:
 
 1. To set up the application as a [systemd user
    service](https://wiki.archlinux.org/index.php/Systemd/User):
